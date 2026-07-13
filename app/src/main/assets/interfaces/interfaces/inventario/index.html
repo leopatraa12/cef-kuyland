@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Xyron Inventory</title>
+    <style>
+        @font-face {
+            font-family: "HelveticaMedium";
+            src: url("../../Fonts/HELVETICANEUELTCOM-MD.TTF") format("truetype");
+        }
+
+        @font-face {
+            font-family: "HelveticaCondensed";
+            src: url("../../Fonts/HELVETICANEUELTCOM-MDCN.TTF") format("truetype");
+        }
+
+        :root {
+            --bg:
+                radial-gradient(circle at 50% 12%, rgba(29, 66, 160, 0.08), transparent 34%),
+                linear-gradient(180deg, #090a0d 0%, #040507 100%);
+            --panel: rgba(2, 3, 5, 0.985);
+            --slot: rgba(5, 7, 10, 0.98);
+            --line: rgba(255, 255, 255, 0.075);
+            --line-soft: rgba(255, 255, 255, 0.03);
+            --blue: #1e63ff;
+            --text: #f8fafc;
+            --muted: rgba(226, 232, 240, 0.52);
+            --stage-scale: 1;
+            --shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+            color: var(--text);
+            font-family: "HelveticaMedium", Arial, sans-serif;
+        }
+
+        body {
+            display: grid;
+            place-items: center;
+        }
+
+        body.runtime-app {
+            background: transparent;
+        }
+
+        body.preview {
+            padding: 14px;
+            background: var(--bg);
+        }
+
+        button,
+        input {
+            font: inherit;
+            color: inherit;
+            border: 0;
+            background: transparent;
+        }
+
+        button {
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .stage {
+            width: 718px;
+            height: 398px;
+            transform: scale(var(--stage-scale));
+            transform-origin: center center;
+        }
+
+        body.preview .stage {
+            width: min(760px, 100%);
+            aspect-ratio: 718 / 398;
+            height: auto;
+            transform: none;
+        }
+
+        .inventory {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(4, 5, 7, 0.995), rgba(2, 3, 4, 0.995));
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            contain: layout paint style;
+        }
+
+        .inventory::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 50% 50%, rgba(23, 70, 192, 0.03), transparent 46%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.012), transparent 28%);
+            pointer-events: none;
+        }
+
+        .hero {
+            position: absolute;
+            left: 28px;
+            top: 22px;
+            display: grid;
+            gap: 4px;
+        }
+
+        .title {
+            font-family: "HelveticaCondensed", Arial, sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--blue);
+        }
+
+        .hero-line {
+            position: absolute;
+            left: 163px;
+            top: 43px;
+            width: 54px;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0));
+        }
+
+        .hero-line::before {
+            content: "";
+            position: absolute;
+            left: -4px;
+            top: -2px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--blue);
+            box-shadow: 0 0 8px rgba(30, 99, 255, 0.55);
+        }
+
+        .weight-card {
+            position: absolute;
+            left: 238px;
+            top: 22px;
+            display: grid;
+            justify-items: center;
+            gap: 0;
+            text-transform: uppercase;
+        }
+
+        .weight-label {
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: var(--blue);
+        }
+
+        .weight-current,
+        .weight-max {
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1.08;
+        }
+
+        .runtime-strip {
+            position: absolute;
+            right: 28px;
+            top: 23px;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 9px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(7, 9, 12, 0.9);
+            font-size: 7px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(226, 232, 240, 0.72);
+        }
+
+        .runtime-strip::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #ff5b5b;
+            box-shadow: 0 0 10px rgba(255, 91, 91, 0.34);
+        }
+
+        html[data-xyron-live="connected"] .runtime-strip::before {
+            background: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.34);
+        }
+
+        .left-grid-wrap,
+        .right-grid-wrap {
+            position: absolute;
+            top: 74px;
+            width: 266px;
+            height: 316px;
+            overflow: hidden;
+            contain: layout paint;
+        }
+
+        .left-grid-wrap {
+            left: 28px;
+        }
+
+        .right-grid-wrap {
+            right: 28px;
+        }
+
+        .left-grid-wrap::after,
+        .right-grid-wrap::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(180deg, rgba(30, 99, 255, 0), rgba(30, 99, 255, 0.72), rgba(30, 99, 255, 0));
+            opacity: 0.88;
+            pointer-events: none;
+        }
+
+        .grid {
+            width: 266px;
+            display: grid;
+            grid-template-columns: repeat(5, 50px);
+            grid-auto-rows: 76px;
+            gap: 4px;
+            contain: layout paint;
+        }
+
+        .slot {
+            position: relative;
+            width: 50px;
+            height: 76px;
+            border: 1px solid var(--line);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0)),
+                var(--slot);
+            overflow: hidden;
+            touch-action: none;
+            transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+            contain: layout paint style;
+        }
+
+        .slot.empty {
+            cursor: default;
+        }
+
+        .slot.filled {
+            cursor: pointer;
+        }
+
+        .slot.filled:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .slot.selected {
+            border-color: var(--blue);
+            box-shadow:
+                inset 0 0 0 1px rgba(30, 99, 255, 0.44),
+                0 0 0 1px rgba(30, 99, 255, 0.08);
+        }
+
+        .slot.drag-source {
+            opacity: 0.34;
+        }
+
+        .slot.drag-target {
+            border-color: var(--blue);
+            box-shadow:
+                inset 0 0 0 1px rgba(30, 99, 255, 0.4),
+                0 0 0 1px rgba(30, 99, 255, 0.08),
+                0 0 16px rgba(30, 99, 255, 0.14);
+        }
+
+        .slot-content {
+            position: absolute;
+            inset: 0;
+            padding: 5px 5px 6px;
+            display: grid;
+            grid-template-rows: auto auto 1fr auto;
+            gap: 1px;
+        }
+
+        .slot-name {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 6px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: rgba(248, 250, 252, 0.95);
+        }
+
+        .slot-weight {
+            font-size: 6px;
+            color: rgba(226, 232, 240, 0.55);
+        }
+
+        .slot-figure {
+            min-height: 0;
+            display: grid;
+            place-items: center;
+            align-self: end;
+        }
+
+        .slot-figure img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.42));
+            user-select: none;
+            -webkit-user-drag: none;
+            pointer-events: none;
+        }
+
+        .slot-qty {
+            justify-self: end;
+            font-size: 7px;
+            font-weight: 700;
+            color: rgba(248, 250, 252, 0.96);
+        }
+
+        .middle-divider-left,
+        .middle-divider-right {
+            position: absolute;
+            top: 82px;
+            bottom: 70px;
+            width: 1px;
+            background: linear-gradient(180deg, rgba(30, 99, 255, 0), rgba(30, 99, 255, 0.55), rgba(30, 99, 255, 0));
+            opacity: 0.72;
+            pointer-events: none;
+        }
+
+        .middle-divider-left {
+            left: 305px;
+        }
+
+        .middle-divider-right {
+            left: 412px;
+        }
+
+        .controls {
+            position: absolute;
+            left: 316px;
+            top: 121px;
+            width: 86px;
+            display: grid;
+            gap: 11px;
+            contain: layout paint;
+        }
+
+        .qty-card {
+            display: grid;
+            gap: 7px;
+        }
+
+        .qty-label {
+            font-size: 7px;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            text-align: center;
+            color: rgba(226, 232, 240, 0.66);
+        }
+
+        .qty-input {
+            width: 100%;
+            height: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(10, 12, 16, 0.96);
+            text-align: center;
+            font-size: 8.5px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            outline: none;
+        }
+
+        .qty-input::placeholder {
+            color: rgba(226, 232, 240, 0.4);
+        }
+
+        .actions {
+            display: grid;
+            gap: 7px;
+        }
+
+        .action {
+            height: 30px;
+            padding: 0 9px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: linear-gradient(180deg, rgba(12, 15, 20, 0.98), rgba(7, 9, 12, 0.98));
+            display: grid;
+            grid-template-columns: 11px 1fr;
+            align-items: center;
+            gap: 8px;
+            font-size: 7.2px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            transition: border-color 120ms ease, transform 120ms ease;
+        }
+
+        .action svg {
+            width: 11px;
+            height: 11px;
+            display: block;
+            opacity: 0.8;
+        }
+
+        .action:hover {
+            border-color: rgba(30, 99, 255, 0.2);
+        }
+
+        .action:active {
+            transform: translateY(1px);
+        }
+
+        .action.use svg {
+            color: #dbeafe;
+        }
+
+        .action.send svg {
+            color: #c4b5fd;
+        }
+
+        .action.craft svg {
+            color: #93c5fd;
+        }
+
+        .action.trash svg {
+            color: #fca5a5;
+        }
+
+        .action.close svg {
+            color: #e2e8f0;
+        }
+
+        body.dragging,
+        body.dragging * {
+            cursor: grabbing !important;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .drag-ghost {
+            position: fixed;
+            left: 0;
+            top: 0;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.95;
+            filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.42));
+            will-change: transform;
+        }
+
+        .drag-ghost .slot {
+            transform-origin: top left;
+        }
+
+        body.runtime-app .inventory {
+            box-shadow: none;
+        }
+
+        body.runtime-app .inventory::before {
+            background: radial-gradient(circle at 50% 50%, rgba(23, 70, 192, 0.018), transparent 42%);
+        }
+
+        body.runtime-app .slot,
+        body.runtime-app .action {
+            transition: none;
+        }
+
+        body.runtime-app .slot.filled:hover,
+        body.runtime-app .action:active {
+            transform: none;
+        }
+
+        body.runtime-app .slot-figure img,
+        body.runtime-app .drag-ghost {
+            filter: none;
+        }
+
+        body.runtime-app .slot.drag-target {
+            box-shadow:
+                inset 0 0 0 1px rgba(30, 99, 255, 0.34),
+                0 0 0 1px rgba(30, 99, 255, 0.06);
+        }
+
+        body.runtime-lite .inventory::before,
+        body.runtime-lite .runtime-strip,
+        body.runtime-lite .hero-line::before {
+            display: none;
+        }
+
+        body.runtime-lite .slot.selected,
+        body.runtime-lite .slot.drag-target {
+            box-shadow: inset 0 0 0 1px rgba(30, 99, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+<main class="stage">
+    <section class="inventory">
+        <header class="hero">
+            <h1 class="title">INVENTÁRIO</h1>
+            <span class="subtitle">MOCHILA</span>
+        </header>
+        <span class="hero-line" aria-hidden="true"></span>
+
+        <header class="weight-card">
+            <span class="weight-label">PESO</span>
+            <strong class="weight-current" id="weightCurrent">7.05 /</strong>
+            <strong class="weight-max" id="weightMax">120.00 KG</strong>
+        </header>
+        <div class="runtime-strip" id="runtimeStrip">LIVE SYNC</div>
+
+        <div class="middle-divider-left" aria-hidden="true"></div>
+        <div class="middle-divider-right" aria-hidden="true"></div>
+
+        <section class="left-grid-wrap">
+            <section class="grid" id="bagGrid"></section>
+        </section>
+
+        <section class="controls">
+            <label class="qty-card" for="qtyInput">
+                <span class="qty-label">Quantidade</span>
+                <input class="qty-input" id="qtyInput" type="text" inputmode="numeric" placeholder="QTD">
+            </label>
+
+            <div class="actions">
+                <button class="action use" id="useButton" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M8.5 12.5 11 15l4.5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 21c4.97 0 9-4.03 9-9s-4.03-9-9-9-9 4.03-9 9 4.03 9 9 9Z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span>Usar</span>
+                </button>
+
+                <button class="action send" id="moveButton" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="m4 11 15-7-4 16-3.5-6.5L4 11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Enviar</span>
+                </button>
+
+                <button class="action craft" id="craftButton" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="m8 16 8-8M7 7l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M5 19h4l2-2-4-4-2 2v4ZM15 5h4v4l-2 2-4-4 2-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Criação</span>
+                </button>
+
+                <button class="action trash" id="trashButton" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M6 7h12M9 7V5h6v2m-8 0 1 12h8l1-12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Lixo</span>
+                </button>
+
+                <button class="action close" id="closeButton" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="m7 7 10 10M17 7 7 17" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                    </svg>
+                    <span>Fechar</span>
+                </button>
+            </div>
+        </section>
+
+        <section class="right-grid-wrap">
+            <section class="grid" id="dropGrid"></section>
+        </section>
+    </section>
+</main>
+
+<script src="../shared/xyron-runtime.js"></script>
+<script>
+    const bridge = window.Android || null;
+    const isPreview = !bridge;
+    const stageBase = { width: 718, height: 398 };
+    const SLOT_WIDTH = 50;
+    const SLOT_HEIGHT = 76;
+    const maxWeight = 120;
+    const runtime = window.XyronRuntime.boot({
+        page: "inventory",
+        bridge,
+        preview: isPreview
+    });
+    const runtimeLowRamMode = !!(runtime.config && runtime.config.performance && runtime.config.performance.lowRam);
+
+    document.body.classList.toggle("preview", isPreview);
+    document.body.classList.toggle("runtime-app", !isPreview);
+    document.body.classList.toggle("runtime-lite", !isPreview && runtimeLowRamMode);
+
+    const ITEM_TYPES = {
+        sanduiche: { id: "sanduiche", name: "SANDUÍCHE", weight: 0.2, displayWeight: 0.2, image: "images/sandwich.png" },
+        radio: { id: "radio", name: "RÁDIO", weight: 0.5, displayWeight: 0.5, image: "images/radio.png" },
+        celular: { id: "celular", name: "CELULAR", weight: 0.2, displayWeight: 0.2, image: "images/phone.png" },
+        dinheiro: { id: "dinheiro", name: "DINHEIRO", weight: 0.0, displayWeight: 0.0, image: "images/money.png" },
+        agua: { id: "agua", name: "ÁGUA", weight: 0.5, displayWeight: 0.5, image: "images/water_bottle.png" },
+        passaporte: { id: "passaporte", name: "PASSAPORTE", weight: 0.05, displayWeight: 0.05, image: "images/id_card.png" },
+        algema: { id: "algema", name: "ALGEMA", weight: 0.75, displayWeight: 1.0, image: "images/handcuffs.png" },
+        repairkit: { id: "repairkit", name: "KIT DE REPARO", weight: 1.0, displayWeight: 1.0, image: "images/repairkit.png" },
+        lockpick: { id: "lockpick", name: "LOCKPICK", weight: 0.1, displayWeight: 0.1, image: "images/lockpick.png" }
+    };
+
+    const REMOTE_ITEM_IMAGES = {
+        sanduiche: "images/sandwich.png",
+        radio: "images/radio.png",
+        celular: "images/phone.png",
+        dinheiro: "https://raw.githubusercontent.com/overextended/ox_inventory/main/web/images/money.png",
+        agua: "images/water_bottle.png",
+        passaporte: "images/id_card.png",
+        algema: "images/handcuffs.png",
+        repairkit: "images/repairkit.png",
+        lockpick: "images/lockpick.png"
+    };
+
+    const bagSlots = Array.from({ length: 25 }, () => null);
+    bagSlots[0] = { type: ITEM_TYPES.sanduiche, qty: 5, action: "/comer" };
+    bagSlots[1] = { type: ITEM_TYPES.radio, qty: 1, action: "/radio" };
+    bagSlots[2] = { type: ITEM_TYPES.celular, qty: 1, mode: "phone" };
+    bagSlots[3] = { type: ITEM_TYPES.dinheiro, qty: 4500 };
+    bagSlots[4] = { type: ITEM_TYPES.agua, qty: 2, action: "/beber" };
+    bagSlots[5] = { type: ITEM_TYPES.passaporte, qty: 1, action: "/id" };
+    bagSlots[6] = { type: ITEM_TYPES.algema, qty: 4, action: "/algemar" };
+    bagSlots[7] = { type: ITEM_TYPES.repairkit, qty: 1, action: "/repair" };
+    bagSlots[8] = { type: ITEM_TYPES.lockpick, qty: 3, action: "/lockpick" };
+
+    const dropSlots = Array.from({ length: 25 }, () => null);
+    const bagGrid = document.getElementById("bagGrid");
+    const dropGrid = document.getElementById("dropGrid");
+    const weightCurrentElement = document.getElementById("weightCurrent");
+    const weightMaxElement = document.getElementById("weightMax");
+    const runtimeStripElement = document.getElementById("runtimeStrip");
+    const qtyInput = document.getElementById("qtyInput");
+    const gridButtons = {
+        bag: [],
+        drop: []
+    };
+
+    let selectedArea = "bag";
+    let selectedIndex = 0;
+    let dragState = null;
+    let suppressClickUntil = 0;
+    let pendingDragFrame = 0;
+    let pendingDragPoint = null;
+    let lastWeightText = "";
+    let lastWeightMaxText = "";
+
+    function callBridge(method, ...args) {
+        if (!bridge || typeof bridge[method] !== "function") {
+            return null;
+        }
+        try {
+            return bridge[method](...args);
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function slotsFor(area) {
+        return area === "drop" ? dropSlots : bagSlots;
+    }
+
+    function getSelectedItem() {
+        return slotsFor(selectedArea)[selectedIndex] || null;
+    }
+
+    function selectFirstFilled() {
+        for (const [index, item] of bagSlots.entries()) {
+            if (item) {
+                selectedArea = "bag";
+                selectedIndex = index;
+                return item;
+            }
+        }
+        for (const [index, item] of dropSlots.entries()) {
+            if (item) {
+                selectedArea = "drop";
+                selectedIndex = index;
+                return item;
+            }
+        }
+        return null;
+    }
+
+    function ensureValidSelection() {
+        return getSelectedItem() || selectFirstFilled();
+    }
+
+    function formatWeight(value) {
+        return value.toFixed(2);
+    }
+
+    function totalWeight(slots) {
+        return slots.reduce((sum, item) => {
+            if (!item) {
+                return sum;
+            }
+            return sum + (item.type.weight * item.qty);
+        }, 0);
+    }
+
+    function moveAmountFor(item) {
+        if (!item) {
+            return 0;
+        }
+        const raw = document.getElementById("qtyInput").value.trim();
+        const parsed = Number.parseInt(raw, 10);
+        if (!Number.isFinite(parsed) || parsed <= 0) {
+            return 1;
+        }
+        return Math.min(parsed, item.qty);
+    }
+
+    function selectedMoveAmount() {
+        const item = ensureValidSelection();
+        return moveAmountFor(item);
+    }
+
+    function buildSlotMarkup(item) {
+        if (!item) {
+            return "";
+        }
+        const imageSrc = isPreview
+            ? runtime.resolveAsset(REMOTE_ITEM_IMAGES[item.type.id] || item.type.image, item.type.image)
+            : item.type.image;
+        return `
+            <div class="slot-content">
+                <span class="slot-name">${item.type.name}</span>
+                <span class="slot-weight">${formatWeight(item.type.displayWeight)}</span>
+                <div class="slot-figure">
+                    <img src="${imageSrc}" alt="${item.type.name}" loading="lazy" decoding="async" draggable="false" onerror="this.onerror=null;this.src='${item.type.image}';">
+                </div>
+                <span class="slot-qty">${item.qty}x</span>
+            </div>
+        `;
+    }
+
+    function setSelectedSlot(area, index) {
+        if (selectedArea === area && selectedIndex === index) {
+            return;
+        }
+        const previousButton = gridButtons[selectedArea] && gridButtons[selectedArea][selectedIndex];
+        if (previousButton) {
+            previousButton.classList.remove("selected");
+            previousButton._xyronSelected = false;
+        }
+        selectedArea = area;
+        selectedIndex = index;
+        const nextButton = gridButtons[selectedArea] && gridButtons[selectedArea][selectedIndex];
+        if (nextButton && slotsFor(area)[index]) {
+            nextButton.classList.add("selected");
+            nextButton._xyronSelected = true;
+        }
+    }
+
+    function bindSlotButton(button, area, index) {
+        button.type = "button";
+        button.dataset.area = area;
+        button.dataset.index = String(index);
+        button.addEventListener("pointerdown", (event) => handleSlotPointerDown(event, area, index, button));
+        button.addEventListener("click", (event) => {
+            if (shouldSuppressClick()) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            if (!slotsFor(area)[index]) {
+                return;
+            }
+            setSelectedSlot(area, index);
+        });
+        button.addEventListener("dblclick", (event) => {
+            if (shouldSuppressClick()) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            if (!slotsFor(area)[index]) {
+                return;
+            }
+            setSelectedSlot(area, index);
+            useSelectedItem();
+        });
+    }
+
+    function ensureGridButtons(area, grid, slots) {
+        const buttons = gridButtons[area];
+        if (buttons.length === slots.length) {
+            return buttons;
+        }
+        const fragment = document.createDocumentFragment();
+        buttons.length = 0;
+        slots.forEach((_, index) => {
+            const button = document.createElement("button");
+            bindSlotButton(button, area, index);
+            buttons.push(button);
+            fragment.appendChild(button);
+        });
+        grid.replaceChildren(fragment);
+        return buttons;
+    }
+
+    function updateSlotButton(button, area, index, item) {
+        const isSelected = selectedArea === area && selectedIndex === index && !!item;
+        const renderKey = item ? `${item.type.id}|${item.qty}|${isSelected ? 1 : 0}` : `empty|${isSelected ? 1 : 0}`;
+        if (button._xyronKey === renderKey) {
+            return;
+        }
+
+        button._xyronKey = renderKey;
+        button._xyronSelected = isSelected;
+        button.className = `slot${item ? " filled" : " empty"}${isSelected ? " selected" : ""}`;
+        button.innerHTML = item ? buildSlotMarkup(item) : "";
+
+        if (item) {
+            button.setAttribute("aria-label", item.type.name);
+        } else {
+            button.removeAttribute("aria-label");
+        }
+    }
+
+    function renderGrid(area, grid, slots) {
+        const buttons = ensureGridButtons(area, grid, slots);
+        slots.forEach((item, index) => {
+            updateSlotButton(buttons[index], area, index, item);
+        });
+    }
+
+    function renderWeight() {
+        const current = totalWeight(bagSlots);
+        const nextCurrentText = `${formatWeight(current)} /`;
+        if (lastWeightText !== nextCurrentText) {
+            lastWeightText = nextCurrentText;
+            weightCurrentElement.textContent = nextCurrentText;
+        }
+        const nextMaxText = `${formatWeight(maxWeight)} KG`;
+        if (lastWeightMaxText !== nextMaxText) {
+            lastWeightMaxText = nextMaxText;
+            weightMaxElement.textContent = nextMaxText;
+        }
+    }
+
+    function render() {
+        ensureValidSelection();
+        renderWeight();
+        renderGrid("bag", bagGrid, bagSlots);
+        renderGrid("drop", dropGrid, dropSlots);
+    }
+
+    function useSelectedItem() {
+        const item = ensureValidSelection();
+        if (!item) {
+            return;
+        }
+        if (item.mode === "phone") {
+            callBridge("openPhone");
+            return;
+        }
+        if (item.action) {
+            callBridge("runCommand", item.action);
+        }
+    }
+
+    function mergeOrPlace(targetSlots, itemType, qty) {
+        const sameIndex = targetSlots.findIndex((entry) => entry && entry.type.id === itemType.id);
+        if (sameIndex !== -1) {
+            targetSlots[sameIndex].qty += qty;
+            return sameIndex;
+        }
+        const emptyIndex = targetSlots.findIndex((entry) => entry === null);
+        if (emptyIndex === -1) {
+            return -1;
+        }
+        targetSlots[emptyIndex] = { type: itemType, qty };
+        return emptyIndex;
+    }
+
+    function moveSelectedItem() {
+        const sourceSlots = slotsFor(selectedArea);
+        const targetArea = selectedArea === "bag" ? "drop" : "bag";
+        const targetSlots = slotsFor(targetArea);
+        const item = sourceSlots[selectedIndex];
+
+        if (!item) {
+            return;
+        }
+
+        const amount = selectedMoveAmount();
+        const targetIndex = mergeOrPlace(targetSlots, item.type, amount);
+        if (targetIndex === -1) {
+            return;
+        }
+
+        item.qty -= amount;
+        if (item.qty <= 0) {
+            sourceSlots[selectedIndex] = null;
+        }
+
+        selectedArea = targetArea;
+        selectedIndex = targetIndex;
+        render();
+    }
+
+    function shouldSuppressClick() {
+        return performance.now() < suppressClickUntil;
+    }
+
+    function createDragGhost(sourceButton) {
+        const sourceRect = sourceButton.getBoundingClientRect();
+        const wrapper = document.createElement("div");
+        wrapper.className = "drag-ghost";
+        wrapper.style.width = `${sourceRect.width}px`;
+        wrapper.style.height = `${sourceRect.height}px`;
+
+        const clone = sourceButton.cloneNode(true);
+        clone.classList.remove("selected", "drag-source", "drag-target");
+        clone.style.width = `${SLOT_WIDTH}px`;
+        clone.style.height = `${SLOT_HEIGHT}px`;
+        clone.style.transform = `scale(${sourceRect.width / SLOT_WIDTH}, ${sourceRect.height / SLOT_HEIGHT})`;
+
+        wrapper.appendChild(clone);
+        document.body.appendChild(wrapper);
+        return wrapper;
+    }
+
+    function updateGhostPosition(x, y) {
+        if (!dragState || !dragState.ghost) {
+            return;
+        }
+        dragState.ghost.style.transform = `translate3d(${x - (dragState.rect.width / 2)}px, ${y - (dragState.rect.height / 2)}px, 0)`;
+    }
+
+    function getSlotTargetAtPoint(x, y) {
+        const element = document.elementFromPoint(x, y);
+        const slot = element ? element.closest(".slot") : null;
+        if (!slot) {
+            return null;
+        }
+        const area = slot.dataset.area;
+        const index = Number.parseInt(slot.dataset.index, 10);
+        if (!area || !Number.isFinite(index)) {
+            return null;
+        }
+        return { area, index, element: slot };
+    }
+
+    function setDragTarget(target) {
+        if (!dragState) {
+            return;
+        }
+        if (dragState.targetElement && dragState.targetElement !== dragState.sourceButton) {
+            dragState.targetElement.classList.remove("drag-target");
+        }
+        dragState.targetElement = target ? target.element : null;
+        dragState.targetArea = target ? target.area : null;
+        dragState.targetIndex = target ? target.index : null;
+        if (dragState.targetElement && dragState.targetElement !== dragState.sourceButton) {
+            dragState.targetElement.classList.add("drag-target");
+        }
+    }
+
+    function handleSlotPointerDown(event, area, index, button) {
+        if (event.button !== undefined && event.button !== 0) {
+            return;
+        }
+        if (!slotsFor(area)[index]) {
+            return;
+        }
+
+        dragState = {
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+            sourceArea: area,
+            sourceIndex: index,
+            sourceButton: button,
+            sourceItem: slotsFor(area)[index],
+            dragging: false,
+            ghost: null,
+            rect: button.getBoundingClientRect(),
+            targetArea: area,
+            targetIndex: index,
+            targetElement: button
+        };
+
+        if (typeof button.setPointerCapture === "function") {
+            try {
+                button.setPointerCapture(event.pointerId);
+            } catch (error) {
+                // Ignore pointer capture failures.
+            }
+        }
+    }
+
+    function startDrag() {
+        if (!dragState || dragState.dragging) {
+            return;
+        }
+        dragState.dragging = true;
+        dragState.sourceButton.classList.add("drag-source");
+        document.body.classList.add("dragging");
+        dragState.ghost = createDragGhost(dragState.sourceButton);
+        updateGhostPosition(dragState.startX, dragState.startY);
+        setDragTarget({
+            area: dragState.sourceArea,
+            index: dragState.sourceIndex,
+            element: dragState.sourceButton
+        });
+    }
+
+    function finalizeDrag() {
+        if (!dragState) {
+            return;
+        }
+
+        const state = dragState;
+        dragState = null;
+        pendingDragPoint = null;
+        if (pendingDragFrame) {
+            cancelAnimationFrame(pendingDragFrame);
+            pendingDragFrame = 0;
+        }
+        suppressClickUntil = state.dragging ? performance.now() + 110 : 0;
+
+        document.body.classList.remove("dragging");
+        state.sourceButton.classList.remove("drag-source");
+        if (state.targetElement && state.targetElement !== state.sourceButton) {
+            state.targetElement.classList.remove("drag-target");
+        }
+        if (state.ghost) {
+            state.ghost.remove();
+        }
+
+        if (!state.dragging) {
+            return;
+        }
+
+        applyDragMove(state.sourceArea, state.sourceIndex, state.targetArea, state.targetIndex);
+    }
+
+    function flushDragFrame() {
+        pendingDragFrame = 0;
+        if (!dragState || !dragState.dragging || !pendingDragPoint) {
+            return;
+        }
+        updateGhostPosition(pendingDragPoint.x, pendingDragPoint.y);
+        setDragTarget(getSlotTargetAtPoint(pendingDragPoint.x, pendingDragPoint.y));
+    }
+
+    function applyDragMove(sourceArea, sourceIndex, targetArea, targetIndex) {
+        if (targetArea == null || targetIndex == null) {
+            return;
+        }
+
+        const sourceSlots = slotsFor(sourceArea);
+        const targetSlots = slotsFor(targetArea);
+        const sourceItem = sourceSlots[sourceIndex];
+
+        if (!sourceItem) {
+            return;
+        }
+
+        if (sourceArea === targetArea && sourceIndex === targetIndex) {
+            selectedArea = sourceArea;
+            selectedIndex = sourceIndex;
+            render();
+            return;
+        }
+
+        const amount = moveAmountFor(sourceItem);
+        const targetItem = targetSlots[targetIndex];
+
+        if (!targetItem) {
+            if (amount >= sourceItem.qty) {
+                targetSlots[targetIndex] = sourceItem;
+                sourceSlots[sourceIndex] = null;
+            } else {
+                targetSlots[targetIndex] = { ...sourceItem, qty: amount };
+                sourceItem.qty -= amount;
+            }
+            selectedArea = targetArea;
+            selectedIndex = targetIndex;
+            render();
+            return;
+        }
+
+        if (targetItem.type.id === sourceItem.type.id) {
+            targetItem.qty += amount;
+            sourceItem.qty -= amount;
+            if (sourceItem.qty <= 0) {
+                sourceSlots[sourceIndex] = null;
+            }
+            selectedArea = targetArea;
+            selectedIndex = targetIndex;
+            render();
+            return;
+        }
+
+        if (amount < sourceItem.qty) {
+            selectedArea = sourceArea;
+            selectedIndex = sourceIndex;
+            render();
+            return;
+        }
+
+        targetSlots[targetIndex] = sourceItem;
+        sourceSlots[sourceIndex] = targetItem;
+        selectedArea = targetArea;
+        selectedIndex = targetIndex;
+        render();
+    }
+
+    function trashSelectedItem() {
+        const sourceSlots = slotsFor(selectedArea);
+        const item = sourceSlots[selectedIndex];
+        if (!item) {
+            return;
+        }
+        const amount = selectedMoveAmount();
+        item.qty -= amount;
+        if (item.qty <= 0) {
+            sourceSlots[selectedIndex] = null;
+        }
+        if (!getSelectedItem()) {
+            selectFirstFilled();
+        }
+        render();
+    }
+
+    function openCraft() {
+        callBridge("runCommand", "/craft");
+    }
+
+    function closeInventory() {
+        callBridge("closeInventory");
+    }
+
+    function applyStageScale() {
+        if (isPreview) {
+            document.documentElement.style.setProperty("--stage-scale", "1");
+            return 1;
+        }
+
+        const scale = Math.min(
+            window.innerWidth / stageBase.width,
+            window.innerHeight / stageBase.height
+        );
+        const safeScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
+        document.documentElement.style.setProperty("--stage-scale", safeScale.toFixed(4));
+        return safeScale;
+    }
+
+    function logInventoryMetrics(source) {
+        const scale = applyStageScale();
+        const stage = document.querySelector(".stage");
+        const rect = stage ? stage.getBoundingClientRect() : { width: 0, height: 0 };
+        console.log(
+            `[InventoryUI] ${source} preview=${isPreview} window=${Math.round(window.innerWidth)}x${Math.round(window.innerHeight)} stage=${Math.round(rect.width)}x${Math.round(rect.height)} scale=${scale.toFixed(3)} dpr=${window.devicePixelRatio}`
+        );
+    }
+
+    async function enablePreviewHotReload() {
+        if (!isPreview || typeof fetch !== "function") {
+            return;
+        }
+
+        let baselineStamp = null;
+        let checking = false;
+
+        async function readStamp() {
+            const response = await fetch(window.location.href, {
+                method: "HEAD",
+                cache: "no-store"
+            });
+            return response.headers.get("last-modified") || response.headers.get("etag");
+        }
+
+        try {
+            baselineStamp = await readStamp();
+        } catch (error) {
+            return;
+        }
+
+        setInterval(async () => {
+            if (checking || document.hidden) {
+                return;
+            }
+
+            checking = true;
+            try {
+                const nextStamp = await readStamp();
+                if (baselineStamp && nextStamp && baselineStamp !== nextStamp) {
+                    window.location.reload();
+                    return;
+                }
+                if (nextStamp) {
+                    baselineStamp = nextStamp;
+                }
+            } catch (error) {
+                // Ignore preview polling failures.
+            } finally {
+                checking = false;
+            }
+        }, 900);
+    }
+
+    document.getElementById("useButton").addEventListener("click", useSelectedItem);
+    document.getElementById("moveButton").addEventListener("click", moveSelectedItem);
+    document.getElementById("craftButton").addEventListener("click", openCraft);
+    document.getElementById("trashButton").addEventListener("click", trashSelectedItem);
+    document.getElementById("closeButton").addEventListener("click", closeInventory);
+
+    qtyInput.addEventListener("blur", () => {
+        const parsed = Number.parseInt(qtyInput.value, 10);
+        qtyInput.value = Number.isFinite(parsed) && parsed > 0 ? String(parsed) : "";
+    });
+
+    window.addEventListener("pointermove", (event) => {
+        if (!dragState || event.pointerId !== dragState.pointerId) {
+            return;
+        }
+
+        const dx = event.clientX - dragState.startX;
+        const dy = event.clientY - dragState.startY;
+
+        if (!dragState.dragging && Math.hypot(dx, dy) > 8) {
+            startDrag();
+        }
+
+        if (!dragState.dragging) {
+            return;
+        }
+
+        event.preventDefault();
+        pendingDragPoint = { x: event.clientX, y: event.clientY };
+        if (!pendingDragFrame) {
+            pendingDragFrame = requestAnimationFrame(flushDragFrame);
+        }
+    }, { passive: false });
+
+    window.addEventListener("pointerup", (event) => {
+        if (!dragState || event.pointerId !== dragState.pointerId) {
+            return;
+        }
+        finalizeDrag();
+    });
+
+    window.addEventListener("pointercancel", (event) => {
+        if (!dragState || event.pointerId !== dragState.pointerId) {
+            return;
+        }
+        finalizeDrag();
+    });
+
+    window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            closeInventory();
+        }
+    });
+
+    window.XyronHydrate = () => {
+        render();
+        requestAnimationFrame(() => logInventoryMetrics("hydrate"));
+    };
+
+    window.addEventListener("resize", () => {
+        applyStageScale();
+        if (!isPreview) {
+            requestAnimationFrame(() => logInventoryMetrics("resize"));
+        }
+    });
+
+    window.addEventListener("xyron:live-status", (event) => {
+        if (!runtimeStripElement) {
+            return;
+        }
+        runtimeStripElement.textContent = event.detail && event.detail.connected ? "SYNC ONLINE" : "SYNC OFF";
+    });
+
+    window.addEventListener("xyron:announcement", (event) => {
+        if (!runtimeStripElement) {
+            return;
+        }
+        const message = (event.detail && event.detail.message) || "LIVE SYNC";
+        runtimeStripElement.textContent = message.slice(0, 18).toUpperCase();
+    });
+
+    window.XyronOverlayVisibilityChanged = (visible) => {
+        document.documentElement.dataset.xyronVisible = visible ? "1" : "0";
+        if (!visible && dragState) {
+            finalizeDrag();
+        }
+    };
+
+    render();
+    applyStageScale();
+    enablePreviewHotReload();
+    requestAnimationFrame(() => logInventoryMetrics("boot"));
+</script>
+</body>
+</html>

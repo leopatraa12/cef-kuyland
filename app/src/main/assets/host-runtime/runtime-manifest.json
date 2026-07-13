@@ -1,0 +1,23 @@
+{
+  "runtimeCandidates": [
+    "xyron-host-arm",
+    "omp-server-arm",
+    "samp03svr-arm",
+    "omp-server",
+    "samp-server",
+    "samp03svr"
+  ],
+  "packagedNativeCandidates": [
+    "libxyron_host.so",
+    "libomp_server_arm.so",
+    "libsamp_server_arm.so",
+    "libsamp03svr_arm.so"
+  ],
+  "packagedComponentPrefix": "libomp_component_",
+  "packagedComponentCount": 22,
+  "preferredRuntimeDir": "server",
+  "componentDir": "server/components",
+  "fallbackRuntimeDir": "bin",
+  "preferredHostPort": 7777,
+  "loopbackAddress": "127.0.0.1:7777"
+}

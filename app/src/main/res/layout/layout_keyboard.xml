@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/main_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="18dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="18dp"
+        android:background="@drawable/samp_keyboard_surface"
+        android:elevation="12dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.xyron.game.launcher.util.CustomEditText
+            android:id="@+id/main_et_input"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/launcher_field_surface_dark"
+            android:ems="10"
+            android:fontFamily="@font/montserrat_bold"
+            android:gravity="center_vertical"
+            android:hint="Digite no chat"
+            android:imeOptions="actionUnspecified|actionGo|actionSend|actionDone|flagNoFullscreen|flagNoExtractUi"
+            android:inputType="text"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:singleLine="true"
+            android:textColor="@android:color/white"
+            android:textColorHint="#8F7F9F"
+            android:textSize="13sp" />
+
+        <Button
+            android:id="@+id/main_but_input_prev"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/samp_keyboard_utility"
+            android:fontFamily="@font/montserrat_black"
+            android:gravity="center"
+            android:text="&#x22C1;"
+            android:textColor="@android:color/white"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/main_but_input_next"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/samp_keyboard_utility"
+            android:fontFamily="@font/montserrat_black"
+            android:gravity="center"
+            android:text="&#x22C0;"
+            android:textColor="@android:color/white"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/main_but_input_slash"
+            android:layout_width="42dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/samp_keyboard_action"
+            android:fontFamily="@font/montserrat_black"
+            android:gravity="center"
+            android:text="/"
+            android:textColor="#221106"
+            android:textSize="13sp" />
+
+        <Button
+            android:id="@+id/main_but_input_send"
+            android:layout_width="74dp"
+            android:layout_height="40dp"
+            android:background="@drawable/samp_keyboard_action"
+            android:fontFamily="@font/montserrat_black"
+            android:gravity="center"
+            android:text="Enviar"
+            android:textAllCaps="false"
+            android:textColor="#221106"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Xyron Radar</title>
+    <style>
+        :root {
+            --frame-dark: #080a0d;
+            --frame-mid: #1d2329;
+            --frame-line: rgba(255, 214, 122, 0.28);
+            --map-grass-a: #86a56f;
+            --map-grass-b: #6e875f;
+            --map-block: #6f8961;
+            --map-road: #2b3036;
+            --map-road-line: rgba(233, 237, 241, 0.16);
+            --route: #f8d34f;
+            --route-shadow: rgba(42, 25, 0, 0.4);
+            --text: #f5f7fa;
+            --muted: rgba(245, 247, 250, 0.78);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+        }
+
+        .radar-shell {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 22%),
+                linear-gradient(135deg, var(--frame-mid), var(--frame-dark));
+            border: 3px solid rgba(3, 4, 6, 0.96);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+                inset 0 0 18px rgba(0, 0, 0, 0.24),
+                0 10px 22px rgba(0, 0, 0, 0.35);
+        }
+
+        .radar-shell::before {
+            content: "";
+            position: absolute;
+            inset: 5px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            pointer-events: none;
+        }
+
+        .map-canvas {
+            position: absolute;
+            inset: 7px;
+            border-radius: 11px;
+            overflow: hidden;
+            background: linear-gradient(180deg, var(--map-grass-a), var(--map-grass-b));
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .gps-tag,
+        .distance-chip,
+        .route-label,
+        .compass {
+            position: absolute;
+            z-index: 2;
+            color: var(--text);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .gps-tag {
+            top: 10px;
+            left: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: rgba(6, 8, 11, 0.68);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+        .gps-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #e65050;
+            box-shadow: 0 0 8px rgba(230, 80, 80, 0.35);
+        }
+
+        html[data-xyron-live="connected"] .gps-dot {
+            background: #4ade80;
+            box-shadow: 0 0 8px rgba(74, 222, 128, 0.35);
+        }
+
+        .compass {
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(6, 8, 11, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .route-label,
+        .distance-chip {
+            bottom: 10px;
+            padding: 5px 8px;
+            border-radius: 999px;
+            background: rgba(6, 8, 11, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 8px;
+            font-weight: 700;
+        }
+
+        .route-label {
+            left: 10px;
+            color: var(--muted);
+            max-width: 54%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .distance-chip {
+            right: 10px;
+            color: #f5d970;
+        }
+    </style>
+</head>
+<body>
+<section class="radar-shell">
+    <div class="map-canvas">
+        <canvas id="radarCanvas"></canvas>
+    </div>
+    <div class="gps-tag">
+        <span class="gps-dot"></span>
+        <span id="liveLabel">GPS</span>
+    </div>
+    <div class="compass">N</div>
+    <div class="route-label" id="routeLabel">Idlewood</div>
+    <div class="distance-chip" id="distanceChip">2.4 KM</div>
+</section>
+
+<script src="../shared/xyron-runtime.js"></script>
+<script>
+    const bridge = window.Android || null;
+    const runtime = window.XyronRuntime.boot({
+        page: "map",
+        bridge,
+        preview: !bridge
+    });
+
+    const canvas = document.getElementById("radarCanvas");
+    const ctx = canvas.getContext("2d");
+    const routeLabel = document.getElementById("routeLabel");
+    const distanceChip = document.getElementById("distanceChip");
+    const liveLabel = document.getElementById("liveLabel");
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+    const state = {
+        progress: 0.24,
+        heading: 38,
+        zoom: 1.06,
+        district: "Idlewood",
+        distance: "2.4 KM",
+        route: [
+            { x: 0.14, y: 0.73 },
+            { x: 0.24, y: 0.67 },
+            { x: 0.32, y: 0.62 },
+            { x: 0.44, y: 0.56 },
+            { x: 0.55, y: 0.49 },
+            { x: 0.67, y: 0.36 },
+            { x: 0.8, y: 0.22 }
+        ],
+        markers: [
+            { x: 0.22, y: 0.68, color: "#4f8cff" },
+            { x: 0.58, y: 0.46, color: "#d26bff" },
+            { x: 0.8, y: 0.22, color: "#ff685c" }
+        ]
+    };
+
+    const roads = [
+        [{ x: 0.05, y: 0.22 }, { x: 0.92, y: 0.22 }],
+        [{ x: 0.05, y: 0.42 }, { x: 0.92, y: 0.42 }],
+        [{ x: 0.05, y: 0.62 }, { x: 0.92, y: 0.62 }],
+        [{ x: 0.2, y: 0.08 }, { x: 0.2, y: 0.92 }],
+        [{ x: 0.47, y: 0.08 }, { x: 0.47, y: 0.92 }],
+        [{ x: 0.76, y: 0.08 }, { x: 0.76, y: 0.92 }],
+        [{ x: 0.05, y: 0.78 }, { x: 0.42, y: 0.45 }],
+        [{ x: 0.35, y: 0.12 }, { x: 0.88, y: 0.63 }]
+    ];
+
+    const blocks = [
+        { x: 0.08, y: 0.09, w: 0.09, h: 0.09 },
+        { x: 0.24, y: 0.09, w: 0.18, h: 0.09 },
+        { x: 0.51, y: 0.09, w: 0.2, h: 0.09 },
+        { x: 0.79, y: 0.09, w: 0.09, h: 0.09 },
+        { x: 0.08, y: 0.28, w: 0.09, h: 0.09 },
+        { x: 0.24, y: 0.28, w: 0.18, h: 0.09 },
+        { x: 0.51, y: 0.28, w: 0.2, h: 0.09 },
+        { x: 0.79, y: 0.28, w: 0.09, h: 0.09 },
+        { x: 0.08, y: 0.48, w: 0.09, h: 0.09 },
+        { x: 0.24, y: 0.48, w: 0.18, h: 0.09 },
+        { x: 0.51, y: 0.48, w: 0.2, h: 0.09 },
+        { x: 0.79, y: 0.48, w: 0.09, h: 0.09 },
+        { x: 0.53, y: 0.67, w: 0.17, h: 0.15 },
+        { x: 0.79, y: 0.69, w: 0.09, h: 0.11 }
+    ];
+
+    let rafId = 0;
+
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    function lerp(a, b, t) {
+        return a + ((b - a) * t);
+    }
+
+    function project(point, width, height) {
+        const px = (point.x - 0.5) * state.zoom + 0.5;
+        const py = (point.y - 0.5) * state.zoom + 0.5;
+        return { x: px * width, y: py * height };
+    }
+
+    function sampleRoute(progress) {
+        const route = state.route;
+        if (!route.length) {
+            return { x: 0.5, y: 0.5 };
+        }
+        if (route.length === 1) {
+            return route[0];
+        }
+        const scaled = clamp(progress, 0, 1) * (route.length - 1);
+        const index = Math.floor(scaled);
+        const nextIndex = Math.min(route.length - 1, index + 1);
+        const localT = scaled - index;
+        return {
+            x: lerp(route[index].x, route[nextIndex].x, localT),
+            y: lerp(route[index].y, route[nextIndex].y, localT)
+        };
+    }
+
+    function resize() {
+        const host = canvas.parentElement.getBoundingClientRect();
+        canvas.width = Math.max(1, Math.round(host.width * dpr));
+        canvas.height = Math.max(1, Math.round(host.height * dpr));
+        canvas.style.width = host.width + "px";
+        canvas.style.height = host.height + "px";
+        draw();
+    }
+
+    function drawBackground(width, height) {
+        const bg = ctx.createLinearGradient(0, 0, width, height);
+        bg.addColorStop(0, "#95b57d");
+        bg.addColorStop(1, "#667f58");
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, width, height);
+
+        blocks.forEach((block, index) => {
+            const x = block.x * width;
+            const y = block.y * height;
+            const w = block.w * width;
+            const h = block.h * height;
+            const tint = index % 2 === 0 ? "rgba(89, 111, 76, 0.86)" : "rgba(115, 140, 99, 0.8)";
+            ctx.fillStyle = tint;
+            ctx.fillRect(x, y, w, h);
+        });
+    }
+
+    function drawRoads(width, height) {
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        roads.forEach((segment) => {
+            ctx.beginPath();
+            segment.forEach((point, index) => {
+                const p = project(point, width, height);
+                if (index === 0) {
+                    ctx.moveTo(p.x, p.y);
+                } else {
+                    ctx.lineTo(p.x, p.y);
+                }
+            });
+            ctx.strokeStyle = "#2c3137";
+            ctx.lineWidth = 18;
+            ctx.stroke();
+
+            ctx.strokeStyle = "rgba(239, 242, 245, 0.12)";
+            ctx.lineWidth = 2.2;
+            ctx.setLineDash([10, 10]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        });
+    }
+
+    function drawRoute(width, height) {
+        ctx.beginPath();
+        state.route.forEach((point, index) => {
+            const p = project(point, width, height);
+            if (index === 0) {
+                ctx.moveTo(p.x, p.y);
+            } else {
+                ctx.lineTo(p.x, p.y);
+            }
+        });
+        ctx.strokeStyle = "rgba(74, 44, 0, 0.34)";
+        ctx.lineWidth = 10;
+        ctx.stroke();
+
+        ctx.beginPath();
+        state.route.forEach((point, index) => {
+            const p = project(point, width, height);
+            if (index === 0) {
+                ctx.moveTo(p.x, p.y);
+            } else {
+                ctx.lineTo(p.x, p.y);
+            }
+        });
+        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--route") || "#f8d34f";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+    }
+
+    function drawMarkers(width, height) {
+        state.markers.forEach((marker) => {
+            const p = project(marker, width, height);
+            ctx.fillStyle = "rgba(0, 0, 0, 0.32)";
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 7.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = marker.color || "#ffffff";
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+
+    function drawPlayer(width, height) {
+        const point = sampleRoute(state.progress);
+        const p = project(point, width, height);
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((state.heading * Math.PI) / 180);
+
+        ctx.fillStyle = "rgba(0, 0, 0, 0.38)";
+        ctx.beginPath();
+        ctx.moveTo(0, -11);
+        ctx.lineTo(8, 10);
+        ctx.lineTo(0, 5);
+        ctx.lineTo(-8, 10);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.translate(0, -1.5);
+        ctx.fillStyle = "#f7fafc";
+        ctx.beginPath();
+        ctx.moveTo(0, -10);
+        ctx.lineTo(7, 9);
+        ctx.lineTo(0, 4.5);
+        ctx.lineTo(-7, 9);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    function drawEdgeFade(width, height) {
+        const vignette = ctx.createRadialGradient(
+            width * 0.5,
+            height * 0.48,
+            Math.min(width, height) * 0.28,
+            width * 0.5,
+            height * 0.5,
+            Math.max(width, height) * 0.82
+        );
+        vignette.addColorStop(0, "rgba(0,0,0,0)");
+        vignette.addColorStop(1, "rgba(0,0,0,0.18)");
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0, 0, width, height);
+    }
+
+    function draw() {
+        const width = canvas.width;
+        const height = canvas.height;
+        ctx.clearRect(0, 0, width, height);
+
+        drawBackground(width, height);
+        drawRoads(width, height);
+        drawRoute(width, height);
+        drawMarkers(width, height);
+        drawPlayer(width, height);
+        drawEdgeFade(width, height);
+    }
+
+    function tick() {
+        state.progress += 0.0014;
+        if (state.progress > 1) {
+            state.progress = 0;
+        }
+        state.heading += 0.12;
+        draw();
+        rafId = window.requestAnimationFrame(tick);
+    }
+
+    window.addEventListener("xyron:live-status", (event) => {
+        const connected = event.detail && event.detail.connected;
+        liveLabel.textContent = connected ? "GPS LIVE" : "GPS";
+    });
+
+    window.addEventListener("xyron:announcement", (event) => {
+        const message = event.detail && event.detail.message ? String(event.detail.message) : "";
+        if (!message) {
+            return;
+        }
+        liveLabel.textContent = message.length > 10 ? message.slice(0, 10) : message;
+    });
+
+    window.addEventListener("xyron:live:map-state", (event) => {
+        const payload = event.detail || {};
+        const data = payload.payload || payload;
+        if (!data || typeof data !== "object") {
+            return;
+        }
+        if (Array.isArray(data.route)) {
+            state.route = data.route;
+        }
+        if (Array.isArray(data.markers)) {
+            state.markers = data.markers;
+        }
+        if (typeof data.progress === "number") {
+            state.progress = data.progress;
+        }
+        if (typeof data.heading === "number") {
+            state.heading = data.heading;
+        }
+        if (typeof data.zoom === "number") {
+            state.zoom = clamp(data.zoom, 0.82, 1.25);
+        }
+        if (typeof data.district === "string" && data.district.trim()) {
+            state.district = data.district.trim();
+            routeLabel.textContent = state.district;
+        }
+        if (typeof data.distance === "string" && data.distance.trim()) {
+            state.distance = data.distance.trim();
+            distanceChip.textContent = state.distance;
+        }
+        draw();
+    });
+
+    routeLabel.textContent = state.district;
+    distanceChip.textContent = state.distance;
+
+    window.addEventListener("resize", resize);
+    resize();
+    tick();
+</script>
+</body>
+</html>

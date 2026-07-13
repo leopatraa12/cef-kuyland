@@ -1,0 +1,110 @@
+name: Android Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      gradleTask:
+        description: "Gradle task to run"
+        required: true
+        default: "assembleDebug"
+        type: choice
+        options:
+          - assembleDebug
+          - assembleRelease
+
+env:
+  NDK_VERSION: "27.0.12077973"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # This repo is source-only (see README): proprietary prebuilt binaries
+      # (jniLibs/*.so, libs/*.aar, libs/*.jar, jni/**/*.a) are intentionally
+      # gitignored and not published here. When they're absent, the steps
+      # below are skipped instead of failing, since a full APK build is not
+      # expected to succeed from this checkout alone. If you fork this repo
+      # privately and commit your own copies of those files (git add -f),
+      # this workflow will automatically run the full native + Gradle build.
+      - name: Check for prebuilt binaries
+        id: binaries
+        run: |
+          present=true
+          check() {
+            if [ ! -e "$1" ]; then
+              echo "::warning::Missing $1 (gitignored, not published in this source-only repo)"
+              present=false
+            fi
+          }
+          check "app/libs/sampmobilecef-1.0.0-release.aar"
+          check "app/libs/com.bda.controller.jar"
+          check "jni/jni/vendor/libs/libopus.a"
+          check "jni/jni/vendor/cef/libSAMPMobileCef.a"
+          if [ -z "$(ls -A app/src/main/jniLibs/armeabi-v7a 2>/dev/null)" ]; then
+            echo "::warning::app/src/main/jniLibs/armeabi-v7a is empty (prebuilt .so files are gitignored)"
+            present=false
+          fi
+          echo "present=$present" >> "$GITHUB_OUTPUT"
+
+      - name: Notice - skipping build
+        if: steps.binaries.outputs.present != 'true'
+        run: |
+          echo "::notice::Skipping native/Gradle build - proprietary binaries aren't committed to this public, source-only repo. Supply your own copies locally to build a runnable APK (see README.md)."
+
+      - name: Set up JDK 17
+        if: steps.binaries.outputs.present == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Android SDK
+        if: steps.binaries.outputs.present == 'true'
+        uses: android-actions/setup-android@v3
+
+      - name: Cache NDK
+        if: steps.binaries.outputs.present == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.ANDROID_HOME }}/ndk/${{ env.NDK_VERSION }}
+          key: ndk-${{ env.NDK_VERSION }}
+
+      - name: Install SDK platform, build-tools and NDK
+        if: steps.binaries.outputs.present == 'true'
+        run: |
+          sdkmanager --install "platforms;android-33" "build-tools;34.0.0" "ndk;${NDK_VERSION}"
+          yes | sdkmanager --licenses || true
+
+      - name: Build native libSAMP.so
+        if: steps.binaries.outputs.present == 'true'
+        working-directory: jni
+        run: "$ANDROID_HOME/ndk/$NDK_VERSION/ndk-build"
+
+      - name: Copy libSAMP.so into jniLibs
+        if: steps.binaries.outputs.present == 'true'
+        run: |
+          mkdir -p app/src/main/jniLibs/armeabi-v7a
+          cp jni/libs/armeabi-v7a/libSAMP.so app/src/main/jniLibs/armeabi-v7a/libSAMP.so
+
+      - name: Make gradlew executable
+        if: steps.binaries.outputs.present == 'true'
+        run: chmod +x gradlew
+
+      - name: Build APK
+        if: steps.binaries.outputs.present == 'true'
+        run: ./gradlew ":app:${{ github.event.inputs.gradleTask || 'assembleDebug' }}" --no-daemon
+
+      - name: Upload APK artifact
+        if: steps.binaries.outputs.present == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-apk
+          path: app/build/outputs/apk/**/*.apk
+          if-no-files-found: error

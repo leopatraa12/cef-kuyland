@@ -1,0 +1,4115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Phone RP</title>
+    <style>
+        @font-face {
+            font-family: "HelveticaMedium";
+            src: url("../../Fonts/HELVETICANEUELTCOM-MD.TTF") format("truetype");
+        }
+
+        @font-face {
+            font-family: "PriceDown";
+            src: url("../../Fonts/PRICEDOWNGTAVINT.TTF") format("truetype");
+        }
+
+        :root {
+            --page-bg: radial-gradient(circle at 50% 18%, #20262d 0%, #101317 48%, #050608 100%);
+            --phone-edge: linear-gradient(135deg, #101216 0%, #2a2d31 10%, #08090c 27%, #262a2f 48%, #07080b 70%, #1c1f24 88%, #08090b 100%);
+            --screen-bg: radial-gradient(circle at 50% 18%, rgba(60, 89, 148, 0.16), transparent 28%), linear-gradient(180deg, #0b0c10 0%, #050608 100%);
+            --text: #f6f7fb;
+            --muted: rgba(246, 247, 251, 0.88);
+            --shadow: 0 24px 50px rgba(0, 0, 0, 0.5);
+            --nav-bg: rgba(0, 0, 0, 0.74);
+            --nav-line: rgba(255, 255, 255, 0.08);
+            --wa-green: #25d366;
+            --wa-green-dark: #0e7b59;
+            --ig-border: rgba(15, 15, 16, 0.08);
+            --bank-red: #f1424c;
+            --bank-dark: #101114;
+            --stage-scale: 1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+            color: var(--text);
+            font-family: "HelveticaMedium", Arial, sans-serif;
+        }
+
+        body {
+            display: grid;
+            place-items: center;
+        }
+
+        input,
+        textarea {
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        button,
+        input {
+            font: inherit;
+            color: inherit;
+            border: 0;
+            background: transparent;
+            touch-action: manipulation;
+        }
+
+        body.preview {
+            padding: 18px;
+            background: var(--page-bg);
+        }
+
+        .screen,
+        .app-window,
+        .recents-overlay,
+        .runtime-hub {
+            contain: paint style;
+        }
+
+        .app-viewport,
+        .home-shell,
+        .recents-overlay {
+            will-change: transform;
+        }
+
+        .app-body,
+        .wa-thread,
+        .wa-quick-row,
+        .ig-stories,
+        .ig-chip-row,
+        .bank-shell,
+        .utility-shell,
+        .recents-overlay {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+
+        body.runtime-app .phone {
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
+        }
+
+        body.runtime-app .recents-overlay,
+        body.runtime-app .runtime-hub {
+            backdrop-filter: none;
+        }
+
+        body.runtime-app .recent-card,
+        body.runtime-app .preview-toast,
+        body.runtime-app .voice-fab,
+        body.runtime-app .bank-card {
+            box-shadow: none;
+        }
+
+        body.runtime-app .nav-glyph,
+        body.runtime-app .preview-toast {
+            transition: none;
+        }
+
+        body.runtime-lite .runtime-hub {
+            background: rgba(7, 10, 15, 0.9);
+        }
+
+        body.runtime-lite .screen::before {
+            opacity: 0.72;
+        }
+
+        .stage {
+            width: 224px;
+            height: 376px;
+            transform: scale(var(--stage-scale));
+            transform-origin: center center;
+        }
+
+        body.preview .stage {
+            width: min(224px, 100%);
+            aspect-ratio: 224 / 376;
+            height: auto;
+            transform: none;
+        }
+
+        .phone {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            padding: 7px;
+            border-radius: 35px;
+            background: var(--phone-edge);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .phone::before {
+            content: "";
+            position: absolute;
+            inset: 2px;
+            border-radius: 33px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            pointer-events: none;
+        }
+
+        .phone::after {
+            content: "";
+            position: absolute;
+            inset: 10px;
+            border-radius: 29px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            pointer-events: none;
+        }
+
+        .screen {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 29px;
+            overflow: hidden;
+            background: var(--screen-bg);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+        }
+
+        .screen::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 14%),
+                radial-gradient(circle at 50% 94%, rgba(61, 98, 193, 0.22), transparent 24%);
+            pointer-events: none;
+        }
+
+        .dynamic-island {
+            position: absolute;
+            top: 9px;
+            left: 50%;
+            z-index: 10;
+            width: 72px;
+            height: 15px;
+            transform: translateX(-50%);
+            border-radius: 999px;
+            background: linear-gradient(180deg, #090a0d, #010204);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.025);
+        }
+
+        .dynamic-island::before {
+            content: "";
+            position: absolute;
+            left: 18px;
+            top: 5px;
+            width: 20px;
+            height: 5px;
+            border-radius: 999px;
+            background: rgba(16, 18, 23, 0.95);
+        }
+
+        .dynamic-island::after {
+            content: "";
+            position: absolute;
+            right: 18px;
+            top: 4px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #324f8d, #0c152f 78%);
+            opacity: 0.9;
+        }
+
+        .statusbar {
+            position: absolute;
+            top: 16px;
+            left: 15px;
+            right: 15px;
+            z-index: 12;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 8px;
+            font-weight: 600;
+            line-height: 1;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+        }
+
+        .status-icons {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-mark {
+            width: 5px;
+            height: 5px;
+            border-radius: 1px;
+            background: rgba(255, 255, 255, 0.96);
+        }
+
+        .battery {
+            position: relative;
+            width: 14px;
+            height: 7px;
+            border-radius: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.82);
+        }
+
+        .battery::before {
+            content: "";
+            position: absolute;
+            top: 1px;
+            right: -2px;
+            width: 2px;
+            height: 3px;
+            border-radius: 0 2px 2px 0;
+            background: rgba(255, 255, 255, 0.82);
+        }
+
+        .battery::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            width: 75%;
+            border-radius: 1px;
+            background: #9bff7a;
+        }
+
+        .home-shell,
+        .app-viewport,
+        .recents-overlay {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 34px;
+            bottom: 32px;
+        }
+
+        .home-shell.hidden,
+        .app-viewport.hidden,
+        .recents-overlay.hidden {
+            display: none;
+        }
+
+        .apps-grid {
+            position: absolute;
+            top: 12px;
+            left: 17px;
+            right: 17px;
+            z-index: 3;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            column-gap: 8px;
+            row-gap: 10px;
+        }
+
+        .app,
+        .single-app {
+            appearance: none;
+            display: grid;
+            justify-items: center;
+            gap: 3px;
+            padding: 0;
+        }
+
+        .icon-tile {
+            width: 33px;
+            height: 33px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+                0 6px 10px rgba(0, 0, 0, 0.22);
+        }
+
+        .icon-tile svg {
+            width: 69%;
+            height: 69%;
+            display: block;
+        }
+
+        .app-label {
+            font-size: 5px;
+            line-height: 1.05;
+            color: var(--muted);
+            white-space: nowrap;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
+        }
+
+        .single-app {
+            position: absolute;
+            left: 17px;
+            bottom: 40px;
+            z-index: 3;
+        }
+
+        .brand {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 30px;
+            z-index: 1;
+            display: grid;
+            justify-items: center;
+            pointer-events: none;
+            opacity: 0.15;
+        }
+
+        .brand-word {
+            font-family: "PriceDown", sans-serif;
+            font-size: 12px;
+            line-height: 0.88;
+            letter-spacing: 0.16em;
+            color: #1b2544;
+            text-shadow: 0 0 12px rgba(9, 14, 24, 0.92);
+        }
+
+        .pager {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-top: 3px;
+        }
+
+        .pager span {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.24);
+        }
+
+        .pager span.active {
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        .app:active .icon-tile,
+        .single-app:active .icon-tile,
+        .nav-button:active .nav-glyph,
+        .surface-button:active,
+        .mini-action:active,
+        .ig-icon:active,
+        .wa-chat-row:active {
+            transform: scale(0.95);
+        }
+
+        .app-window {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            background: #090a0d;
+            color: #fff;
+        }
+
+        .app-body {
+            position: absolute;
+            inset: 0;
+            overflow: auto;
+        }
+
+        .app-body::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        .app-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px 12px 9px;
+        }
+
+        .app-title {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .app-subtitle {
+            font-size: 6px;
+            opacity: 0.72;
+            margin-top: 2px;
+        }
+
+        .app-tools {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 8px;
+        }
+
+        .mini-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .mini-line {
+            width: 10px;
+            height: 2px;
+            border-radius: 999px;
+            background: currentColor;
+        }
+
+        .whatsapp-window {
+            background: #0b141a;
+        }
+
+        .whatsapp-topbar {
+            background: linear-gradient(180deg, #233138, #1c272d);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .whatsapp-title {
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .wa-tabs {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            padding: 0 8px;
+            height: 22px;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 5px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .wa-tabs span.active {
+            color: #dff7ef;
+        }
+
+        .wa-list {
+            padding: 3px 0 10px;
+        }
+
+        .wa-chat-row {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 34px 1fr auto;
+            gap: 8px;
+            padding: 8px 10px;
+            align-items: center;
+            color: #f7fbfd;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .wa-chat-row + .wa-chat-row {
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .wa-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+        }
+
+        .wa-avatar.green { background: linear-gradient(180deg, #28d365, #167d42); }
+        .wa-avatar.pink { background: linear-gradient(180deg, #ff6b98, #dc4572); }
+        .wa-avatar.blue { background: linear-gradient(180deg, #59b7ff, #246ae3); }
+        .wa-avatar.red { background: linear-gradient(180deg, #ff6c73, #d94550); }
+
+        .wa-main {
+            min-width: 0;
+        }
+
+        .wa-name {
+            font-size: 8px;
+            font-weight: 700;
+            color: #f4f7fa;
+        }
+
+        .wa-preview {
+            margin-top: 2px;
+            font-size: 6px;
+            color: rgba(255, 255, 255, 0.62);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .wa-meta {
+            display: grid;
+            justify-items: end;
+            gap: 4px;
+        }
+
+        .wa-time {
+            font-size: 5.5px;
+            color: rgba(255, 255, 255, 0.54);
+        }
+
+        .wa-badge {
+            min-width: 11px;
+            height: 11px;
+            padding: 0 3px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            background: var(--wa-green);
+            color: #081510;
+            font-size: 5px;
+            font-weight: 700;
+        }
+
+        .wa-chat-screen {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100%;
+        }
+
+        .wa-chat-top {
+            background: linear-gradient(180deg, #1f2c34, #1a252b);
+            padding: 9px 10px;
+            display: grid;
+            grid-template-columns: 30px 1fr auto;
+            gap: 7px;
+            align-items: center;
+        }
+
+        .surface-button {
+            min-height: 24px;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            cursor: pointer;
+        }
+
+        .surface-button.slim {
+            min-height: 22px;
+            padding: 0 8px;
+            font-size: 6px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .wa-thread {
+            padding: 10px;
+            overflow: auto;
+            display: grid;
+            align-content: start;
+            gap: 6px;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.04), transparent 18%),
+                radial-gradient(circle at 82% 12%, rgba(255, 255, 255, 0.03), transparent 16%),
+                linear-gradient(180deg, rgba(0, 0, 0, 0.06), transparent 14%),
+                #0b141a;
+        }
+
+        .wa-thread::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        .wa-message {
+            max-width: 82%;
+            padding: 7px 8px 8px;
+            border-radius: 10px;
+            font-size: 6.5px;
+            line-height: 1.45;
+            letter-spacing: 0.01em;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .wa-message.them {
+            justify-self: start;
+            background: #202c33;
+            border-top-left-radius: 4px;
+        }
+
+        .wa-message.me {
+            justify-self: end;
+            background: #134d37;
+            border-top-right-radius: 4px;
+        }
+
+        .wa-message small {
+            display: block;
+            margin-top: 4px;
+            font-size: 5px;
+            opacity: 0.6;
+            text-align: right;
+        }
+
+        .wa-quick-row {
+            display: flex;
+            gap: 5px;
+            overflow: auto;
+            padding: 0 10px 6px;
+            background: #0b141a;
+        }
+
+        .wa-quick-row::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        .mini-action {
+            flex: none;
+            min-height: 18px;
+            padding: 0 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.07);
+            font-size: 5.5px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            cursor: pointer;
+        }
+
+        .wa-composer {
+            padding: 7px 10px 9px;
+            background: #111b21;
+            display: grid;
+            grid-template-columns: 1fr 24px;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .wa-input {
+            min-height: 24px;
+            padding: 0 9px;
+            border-radius: 999px;
+            background: #202c33;
+            color: #fff;
+            font-size: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .wa-input::placeholder {
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        .wa-send {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: var(--wa-green);
+            color: #0b2017;
+            font-size: 7px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .instagram-window {
+            background: #ffffff;
+            color: #0f1012;
+        }
+
+        .ig-topbar {
+            border-bottom: 1px solid var(--ig-border);
+            background: #ffffff;
+        }
+
+        .ig-logo {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+
+        .ig-stories {
+            display: flex;
+            gap: 8px;
+            padding: 9px 9px 8px;
+            overflow: auto;
+            border-bottom: 1px solid var(--ig-border);
+        }
+
+        .ig-stories::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        .ig-story {
+            width: 40px;
+            flex: none;
+            display: grid;
+            justify-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .ig-ring {
+            width: 40px;
+            height: 40px;
+            padding: 2px;
+            border-radius: 50%;
+            background: conic-gradient(from 200deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5, #feda75);
+        }
+
+        .ig-ring-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            padding: 2px;
+            background: #fff;
+        }
+
+        .ig-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .ig-story span {
+            font-size: 5px;
+            white-space: nowrap;
+            color: #25272c;
+        }
+
+        .ig-feed {
+            padding-bottom: 16px;
+        }
+
+        .ig-post {
+            border-bottom: 1px solid var(--ig-border);
+        }
+
+        .ig-post-head {
+            display: grid;
+            grid-template-columns: 24px 1fr auto;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 9px;
+        }
+
+        .ig-post-head strong {
+            font-size: 7px;
+        }
+
+        .ig-post-head small {
+            display: block;
+            margin-top: 1px;
+            font-size: 5px;
+            color: rgba(15, 16, 18, 0.54);
+        }
+
+        .ig-post-media {
+            aspect-ratio: 1 / 1;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .ig-post-media::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.08) 100%);
+        }
+
+        .ig-media-badge {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+            z-index: 1;
+            padding: 4px 7px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.88);
+            color: #131418;
+            font-size: 5px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .ig-post-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 9px 6px;
+        }
+
+        .ig-action-left {
+            display: flex;
+            gap: 8px;
+        }
+
+        .ig-icon {
+            cursor: pointer;
+            font-size: 8px;
+            font-weight: 700;
+        }
+
+        .ig-icon.liked {
+            color: #e53357;
+        }
+
+        .ig-copy {
+            padding: 0 9px 8px;
+        }
+
+        .ig-likes {
+            font-size: 6px;
+            font-weight: 700;
+        }
+
+        .ig-caption {
+            margin-top: 4px;
+            font-size: 6px;
+            line-height: 1.45;
+            color: #1a1c20;
+        }
+
+        .ig-caption strong {
+            margin-right: 4px;
+        }
+
+        .ig-chip-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 7px;
+            overflow: auto;
+        }
+
+        .ig-chip-row::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        .ig-chip {
+            flex: none;
+            min-height: 18px;
+            padding: 0 8px;
+            border-radius: 999px;
+            background: #f2f3f6;
+            color: #111216;
+            font-size: 5.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            cursor: pointer;
+        }
+
+        .ig-bottom-nav {
+            position: sticky;
+            bottom: 0;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            padding: 7px 0;
+            border-top: 1px solid var(--ig-border);
+            background: rgba(255, 255, 255, 0.96);
+            font-size: 8px;
+            text-align: center;
+            color: #17181b;
+        }
+
+        .bank-window {
+            background:
+                radial-gradient(circle at top right, rgba(241, 66, 76, 0.22), transparent 30%),
+                linear-gradient(180deg, #101115 0%, #0a0b0d 100%);
+        }
+
+        .bank-topbar {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
+        }
+
+        .bank-mark {
+            width: 18px;
+            height: 18px;
+            border-radius: 6px;
+            background: linear-gradient(180deg, #ff525f, #c81b29);
+            display: grid;
+            place-items: center;
+            font-size: 8px;
+            font-weight: 700;
+        }
+
+        .bank-shell {
+            padding: 10px;
+            overflow: auto;
+            display: grid;
+            gap: 9px;
+        }
+
+        .bank-shell::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        .bank-tabs {
+            display: flex;
+            gap: 6px;
+        }
+
+        .bank-tab {
+            min-height: 19px;
+            padding: 0 8px;
+            border-radius: 999px;
+            font-size: 5.5px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+        }
+
+        .bank-tab.active {
+            background: rgba(241, 66, 76, 0.16);
+            border-color: rgba(241, 66, 76, 0.3);
+        }
+
+        .bank-card {
+            padding: 11px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(252, 76, 85, 0.94), rgba(150, 16, 23, 0.96));
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+        }
+
+        .bank-card small {
+            display: block;
+            font-size: 5px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            opacity: 0.75;
+        }
+
+        .bank-balance-row {
+            margin-top: 7px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .bank-balance {
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .bank-toggle {
+            min-height: 18px;
+            padding: 0 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.16);
+            font-size: 5px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .bank-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+        }
+
+        .bank-mini-card,
+        .bank-action-card {
+            border-radius: 13px;
+            padding: 9px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bank-mini-card small,
+        .bank-action-card small {
+            display: block;
+            font-size: 5px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.56);
+        }
+
+        .bank-mini-card strong,
+        .bank-action-card strong {
+            display: block;
+            margin-top: 4px;
+            font-size: 7px;
+            line-height: 1.35;
+        }
+
+        .bank-action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px;
+        }
+
+        .bank-command {
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .bank-primary {
+            min-height: 24px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #ff525f, #d72e3a);
+            color: #fff;
+            font-size: 6px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .bank-list {
+            display: grid;
+            gap: 6px;
+        }
+
+        .bank-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 7px;
+            align-items: center;
+            padding: 8px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .bank-item-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 7px;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.08);
+            font-size: 7px;
+        }
+
+        .bank-item strong {
+            font-size: 6.5px;
+        }
+
+        .bank-item small {
+            display: block;
+            margin-top: 2px;
+            font-size: 5px;
+            color: rgba(255, 255, 255, 0.56);
+        }
+
+        .bank-item-value {
+            font-size: 6.5px;
+            font-weight: 700;
+        }
+
+        .bank-window {
+            background: linear-gradient(180deg, #f7f2fb 0%, #efe7f7 100%);
+            color: #1a1520;
+        }
+
+        .bank-topbar {
+            padding: 12px 12px 15px;
+            display: grid;
+            gap: 10px;
+            background: linear-gradient(180deg, #8a05be 0%, #7a01b5 100%);
+        }
+
+        .bank-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .bank-mark {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+            display: grid;
+            place-items: center;
+            color: #ffffff;
+            font-size: 6.5px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .bank-mark span {
+            transform: translateY(-0.2px);
+        }
+
+        .bank-toolset {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bank-tool {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.16);
+            color: #fff;
+            font-size: 6px;
+            font-weight: 700;
+        }
+
+        .bank-topbar .app-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .bank-topbar .app-subtitle {
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .bank-shell {
+            padding: 10px 10px 14px;
+            gap: 8px;
+        }
+
+        .bank-tab {
+            min-height: 20px;
+            padding: 0 9px;
+            background: rgba(138, 5, 190, 0.08);
+            border: 1px solid rgba(138, 5, 190, 0.12);
+            color: #791da2;
+            letter-spacing: 0.09em;
+        }
+
+        .bank-tab.active {
+            background: #820ad1;
+            border-color: #820ad1;
+            color: #fff;
+            box-shadow: 0 10px 16px rgba(130, 10, 209, 0.18);
+        }
+
+        .bank-card {
+            padding: 12px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #8a05be 0%, #6f03a9 100%);
+            color: #fff;
+            box-shadow: 0 14px 30px rgba(96, 13, 144, 0.22);
+        }
+
+        .bank-card small {
+            color: rgba(255, 255, 255, 0.74);
+        }
+
+        .bank-toggle {
+            color: #fff;
+        }
+
+        .bank-caption {
+            margin-top: 5px;
+            font-size: 5.2px;
+            color: rgba(255, 255, 255, 0.72);
+        }
+
+        .bank-mini-card,
+        .bank-action-card,
+        .bank-item {
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(130, 10, 209, 0.08);
+            box-shadow: 0 8px 18px rgba(62, 27, 81, 0.06);
+            color: #17131d;
+        }
+
+        .bank-mini-card small,
+        .bank-action-card small {
+            color: rgba(122, 1, 181, 0.76);
+        }
+
+        .bank-primary {
+            background: linear-gradient(180deg, #8a05be, #6f03a9);
+            box-shadow: 0 12px 22px rgba(113, 20, 161, 0.18);
+        }
+
+        .bank-item-icon {
+            background: linear-gradient(180deg, #8a05be, #6f03a9);
+            color: #fff;
+            font-size: 6.5px;
+            font-weight: 700;
+        }
+
+        .bank-item strong {
+            color: #16111c;
+        }
+
+        .bank-item small {
+            color: rgba(26, 21, 32, 0.56);
+        }
+
+        .bank-item-value {
+            color: #7114a1;
+        }
+
+        .recents-overlay {
+            z-index: 14;
+            padding: 18px 10px 10px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(6px);
+            overflow: auto;
+        }
+
+        .recents-overlay::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        .recents-title {
+            font-size: 6px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.62);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .recent-card {
+            width: 100%;
+            padding: 10px;
+            border-radius: 16px;
+            background: rgba(18, 19, 24, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            cursor: pointer;
+        }
+
+        .recent-card + .recent-card {
+            margin-top: 8px;
+        }
+
+        .recent-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 7px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.07);
+            font-size: 5px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .recent-card strong {
+            display: block;
+            margin-top: 8px;
+            font-size: 8px;
+        }
+
+        .recent-card p {
+            margin-top: 4px;
+            font-size: 6px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.68);
+        }
+
+        .recents-empty {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 6px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.58);
+        }
+
+        .system-nav {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 32px;
+            z-index: 16;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            align-items: center;
+            padding: 0 18px 2px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 40%),
+                var(--nav-bg);
+            border-top: 1px solid var(--nav-line);
+        }
+
+        .nav-button {
+            display: grid;
+            place-items: center;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .nav-glyph {
+            position: relative;
+            width: 14px;
+            height: 14px;
+            opacity: 0.86;
+            transition: transform 120ms ease;
+        }
+
+        .glyph-triangle::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 2px;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-right: 8px solid rgba(244, 246, 249, 0.92);
+        }
+
+        .glyph-circle {
+            border-radius: 50%;
+            border: 2px solid rgba(244, 246, 249, 0.92);
+        }
+
+        .glyph-square {
+            border: 2px solid rgba(244, 246, 249, 0.92);
+            border-radius: 3px;
+            width: 12px;
+            height: 12px;
+        }
+
+        .preview-toast {
+            position: absolute;
+            left: 50%;
+            bottom: 40px;
+            transform: translateX(-50%);
+            min-width: 120px;
+            max-width: calc(100% - 22px);
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: rgba(9, 10, 13, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            text-align: center;
+            font-size: 5.7px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.92);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 160ms ease, transform 160ms ease;
+            z-index: 18;
+        }
+
+        .preview-toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        .wa { background: linear-gradient(180deg, #27d85c, #16a53c); }
+        .maps { background: linear-gradient(180deg, #7bd6ff, #238dff); }
+        .globe { background: linear-gradient(180deg, #14071c, #08040c); }
+        .insta { background: radial-gradient(circle at 68% 15%, #ffd978 0 14%, #ff9a44 24%, #f44f70 48%, #954cff 75%, #4958ff 100%); }
+        .threads { background: linear-gradient(180deg, #111216, #040506); }
+        .bank { background: linear-gradient(180deg, #9c1be8, #6d03a7); }
+        .music { background: linear-gradient(180deg, #ff6e8d, #ff2f57); }
+        .paypal { background: linear-gradient(180deg, #173a9a, #0a1f5c); }
+        .olx { background: linear-gradient(180deg, #7c2cff, #5a1bd4); }
+        .tinder { background: linear-gradient(180deg, #ff8b93, #ff5b5b); }
+        .note { background: linear-gradient(180deg, #ffda33, #f6b700); }
+        .ifood { background: linear-gradient(180deg, #ff4d57, #d40f1f); }
+        .uber { background: linear-gradient(180deg, #1b1d20, #070708); }
+        .news { background: linear-gradient(180deg, #4587f2, #2d5fca); }
+        .diamond { background: linear-gradient(180deg, #1b1e22, #08090b); }
+        .calc { background: linear-gradient(180deg, #f2f2f2, #d3d3d3); }
+        .memo { background: linear-gradient(180deg, #fff5d7, #ffd44f); }
+        .compass { background: linear-gradient(180deg, #ff362f, #db1b11); }
+        .taco { background: linear-gradient(180deg, #17181c, #070708); }
+
+        .runtime-hub {
+            position: absolute;
+            left: 15px;
+            right: 15px;
+            bottom: 42px;
+            z-index: 7;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 16px;
+            background: rgba(7, 10, 15, 0.74);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+        }
+
+        .runtime-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(246, 247, 251, 0.9);
+        }
+
+        .runtime-status::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #ff5b5b;
+            box-shadow: 0 0 10px rgba(255, 91, 91, 0.34);
+        }
+
+        html[data-xyron-live="connected"] .runtime-status::before {
+            background: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.34);
+        }
+
+        .runtime-copy {
+            min-width: 0;
+            font-size: 7px;
+            color: rgba(246, 247, 251, 0.64);
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .voice-fab {
+            position: absolute;
+            right: 16px;
+            bottom: 86px;
+            z-index: 8;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #6a7dff, #3d54ff);
+            box-shadow: 0 16px 28px rgba(61, 84, 255, 0.28);
+            display: grid;
+            place-items: center;
+        }
+
+        .voice-fab svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        body.compact-runtime .runtime-hub {
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+        }
+
+        body.compact-runtime .voice-fab {
+            right: 14px;
+            bottom: 38px;
+            width: 36px;
+            height: 36px;
+        }
+
+        .map-live-shell,
+        .audio-live-shell,
+        .ops-live-shell {
+            height: 100%;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            background: linear-gradient(180deg, rgba(7, 9, 14, 0.98), rgba(4, 5, 8, 0.98));
+        }
+
+        .live-screen-topbar {
+            padding: 14px 14px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .live-screen-topbar strong {
+            font-size: 12px;
+            letter-spacing: 0.02em;
+        }
+
+        .live-screen-topbar span {
+            display: block;
+            margin-top: 2px;
+            font-size: 8px;
+            color: rgba(246, 247, 251, 0.62);
+        }
+
+        .live-screen-pill {
+            padding: 6px 9px;
+            border-radius: 999px;
+            background: rgba(94, 133, 255, 0.16);
+            color: #dbeafe;
+            font-size: 8px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .map-live-body {
+            padding: 12px 12px 14px;
+            display: grid;
+            grid-template-rows: 1fr auto;
+            gap: 10px;
+        }
+
+        .map-live-canvas {
+            position: relative;
+            min-height: 0;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: linear-gradient(180deg, rgba(7, 10, 16, 0.94), rgba(3, 4, 7, 0.94));
+        }
+
+        .map-live-actions,
+        .ops-actions {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .live-card-button {
+            min-height: 38px;
+            padding: 10px 8px;
+            border-radius: 14px;
+            background: rgba(10, 13, 20, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .audio-live-body,
+        .ops-live-body {
+            padding: 12px;
+            display: grid;
+            gap: 10px;
+            align-content: start;
+        }
+
+        .audio-hero {
+            padding: 12px;
+            border-radius: 18px;
+            background: linear-gradient(145deg, rgba(55, 18, 122, 0.96), rgba(20, 23, 59, 0.96));
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: grid;
+            gap: 8px;
+        }
+
+        .audio-hero strong {
+            font-size: 13px;
+        }
+
+        .audio-hero p {
+            font-size: 8px;
+            color: rgba(246, 247, 251, 0.72);
+            line-height: 1.45;
+        }
+
+        .audio-meter {
+            height: 8px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .audio-meter-fill {
+            width: 18%;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #5eead4, #60a5fa, #a78bfa);
+        }
+
+        .audio-grid,
+        .ops-stack {
+            display: grid;
+            gap: 8px;
+        }
+
+        .audio-row,
+        .ops-card {
+            padding: 11px 12px;
+            border-radius: 16px;
+            background: rgba(9, 12, 18, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .audio-row strong,
+        .ops-card strong {
+            display: block;
+            font-size: 10px;
+            margin-bottom: 3px;
+        }
+
+        .audio-row span,
+        .ops-card span {
+            display: block;
+            font-size: 8px;
+            color: rgba(246, 247, 251, 0.68);
+            line-height: 1.45;
+        }
+
+        .utility-window {
+            background:
+                radial-gradient(circle at top right, rgba(255, 255, 255, 0.08), transparent 26%),
+                linear-gradient(180deg, var(--utility-bg, #101217), var(--utility-bg-deep, #07080b));
+        }
+
+        .utility-topbar {
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .utility-topbar .app-title {
+            color: #ffffff;
+        }
+
+        .utility-topbar .app-subtitle {
+            color: rgba(255, 255, 255, 0.68);
+        }
+
+        .utility-pulse {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.4), transparent 36%), var(--utility-accent, #4f8cff);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+        }
+
+        .utility-shell {
+            padding: 11px 11px 14px;
+            overflow: auto;
+            display: grid;
+            gap: 9px;
+            align-content: start;
+        }
+
+        .utility-shell::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        .utility-hero {
+            padding: 12px;
+            border-radius: 18px;
+            background: linear-gradient(145deg, var(--utility-accent, #4f8cff), var(--utility-accent-deep, #16398f));
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.22);
+        }
+
+        .utility-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            min-height: 18px;
+            padding: 0 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.16);
+            font-size: 5px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .utility-hero strong {
+            display: block;
+            margin-top: 8px;
+            font-size: 12px;
+            line-height: 1.25;
+        }
+
+        .utility-hero p {
+            margin-top: 5px;
+            font-size: 7px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .utility-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 7px;
+        }
+
+        .utility-stat {
+            padding: 9px 8px;
+            border-radius: 14px;
+            background: var(--utility-surface, rgba(255, 255, 255, 0.06));
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .utility-stat strong {
+            display: block;
+            font-size: 8px;
+            color: #fff;
+        }
+
+        .utility-stat span {
+            display: block;
+            margin-top: 3px;
+            font-size: 5px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.56);
+        }
+
+        .utility-card-grid {
+            display: grid;
+            gap: 7px;
+        }
+
+        .utility-card {
+            padding: 10px;
+            border-radius: 15px;
+            background: var(--utility-surface-strong, rgba(7, 10, 15, 0.94));
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .utility-card small {
+            display: block;
+            font-size: 5px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.48);
+        }
+
+        .utility-card strong {
+            display: block;
+            margin-top: 4px;
+            font-size: 8px;
+            color: #ffffff;
+        }
+
+        .utility-card p {
+            margin-top: 4px;
+            font-size: 6px;
+            line-height: 1.55;
+            color: rgba(255, 255, 255, 0.66);
+        }
+
+        .utility-card.inline {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .utility-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 9px;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.08);
+            font-size: 8px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .utility-meta {
+            font-size: 6px;
+            color: rgba(255, 255, 255, 0.58);
+        }
+
+        .utility-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 7px;
+        }
+
+        .utility-button {
+            min-height: 34px;
+            padding: 9px 8px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #ffffff;
+            font-size: 6px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .utility-button.primary {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.12));
+        }
+
+        .utility-banner {
+            padding: 10px 11px;
+            border-radius: 15px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 6px;
+            line-height: 1.55;
+            color: rgba(255, 255, 255, 0.74);
+        }
+
+        .map-chip-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 7px;
+        }
+
+        .map-chip {
+            min-height: 32px;
+            padding: 6px 7px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 5.7px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .map-chip strong {
+            display: block;
+            font-size: 7px;
+            letter-spacing: 0;
+            text-transform: none;
+            margin-top: 2px;
+        }
+
+        .music-station-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 7px;
+        }
+
+        .music-station {
+            padding: 10px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .music-station strong {
+            display: block;
+            font-size: 7px;
+        }
+
+        .music-station span {
+            display: block;
+            margin-top: 4px;
+            font-size: 5.4px;
+            color: rgba(255, 255, 255, 0.64);
+        }
+
+        .calc-window {
+            background:
+                radial-gradient(circle at top center, rgba(255, 255, 255, 0.08), transparent 28%),
+                linear-gradient(180deg, #101216 0%, #08090b 100%);
+        }
+
+        .calc-shell {
+            padding: 12px;
+            display: grid;
+            gap: 9px;
+            align-content: start;
+        }
+
+        .calc-display {
+            min-height: 78px;
+            padding: 14px 12px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(242, 245, 252, 0.12), rgba(242, 245, 252, 0.04));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: grid;
+            align-content: end;
+            justify-items: end;
+        }
+
+        .calc-display small {
+            font-size: 5px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .calc-display strong {
+            display: block;
+            margin-top: 5px;
+            font-size: 16px;
+            line-height: 1;
+            color: #ffffff;
+            word-break: break-all;
+        }
+
+        .calc-keypad {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .calc-key {
+            min-height: 34px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            font-size: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .calc-key.operator {
+            background: linear-gradient(180deg, #ff8c3a, #ff5f2b);
+        }
+
+        .calc-key.function {
+            background: rgba(255, 255, 255, 0.16);
+        }
+    </style>
+</head>
+<body>
+<main class="stage">
+    <section class="phone">
+        <section class="screen">
+            <div class="dynamic-island"></div>
+
+            <header class="statusbar">
+                <span id="clockLabel">01:27</span>
+                <div class="status-icons">
+                    <div class="status-mark"></div>
+                    <div class="battery"></div>
+                </div>
+            </header>
+
+            <section class="home-shell" id="homeShell">
+                <section class="apps-grid" id="appsGrid"></section>
+                <div class="single-app" id="singleApp"></div>
+                <section class="brand" aria-hidden="true">
+                    <div class="brand-word">NIZIN</div>
+                    <div class="pager">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span class="active"></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </section>
+            </section>
+
+            <section class="app-viewport hidden" id="appViewport"></section>
+            <section class="recents-overlay hidden" id="recentsOverlay"></section>
+            <div class="preview-toast" id="previewToast"></div>
+            <div class="runtime-hub" id="runtimeHub">
+                <div class="runtime-status" id="runtimeStatus">Live Sync</div>
+                <div class="runtime-copy" id="runtimeCopy">WebSocket, voz, GPS e audio 3D ativos</div>
+            </div>
+            <button class="voice-fab" id="voiceFab" type="button" aria-label="Acao por voz">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 4a3 3 0 0 1 3 3v5a3 3 0 1 1-6 0V7a3 3 0 0 1 3-3Z" fill="#FFFFFF"/>
+                    <path d="M7 11.5a5 5 0 0 0 10 0M12 16.5v3M9 19.5h6" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+            </button>
+
+            <footer class="system-nav">
+                <button class="nav-button" type="button" aria-label="Voltar" data-nav="back">
+                    <span class="nav-glyph glyph-triangle"></span>
+                </button>
+                <button class="nav-button" type="button" aria-label="Inicio" data-nav="home">
+                    <span class="nav-glyph glyph-circle"></span>
+                </button>
+                <button class="nav-button" type="button" aria-label="Recentes" data-nav="recent">
+                    <span class="nav-glyph glyph-square"></span>
+                </button>
+            </footer>
+        </section>
+    </section>
+</main>
+
+<script src="../shared/xyron-runtime.js"></script>
+<script src="../shared/xyron-experiences.js"></script>
+<script>
+    const bridge = window.Android || null;
+    const isPreview = !bridge;
+    const stageBase = { width: 224, height: 376 };
+    const runtime = window.XyronRuntime.boot({
+        page: "phone",
+        bridge,
+        preview: isPreview
+    });
+    const runtimeLowRamMode = !!(runtime.config && runtime.config.performance && runtime.config.performance.lowRam);
+    document.body.classList.toggle("preview", isPreview);
+    document.body.classList.toggle("runtime-app", !isPreview);
+    document.body.classList.toggle("runtime-lite", !isPreview && runtimeLowRamMode);
+
+    const iconLibrary = {
+        whatsapp: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M32 12c-10.5 0-19 8.2-19 18.4 0 3.7 1.1 7.2 3.1 10.1L13 52l12.2-2.9c2 1 4.3 1.5 6.8 1.5 10.5 0 19-18.3 19-18.3C51 20.2 42.5 12 32 12Z" stroke="#FFFFFF" stroke-width="4.2" stroke-linejoin="round"/>
+                <path d="M26.2 24.6c-.8 1-.7 2.3-.2 3.7 1.2 2.8 4.2 6.3 7.5 8.3 1.8 1 3.4 1.1 4.6.2l1.8-1.4c.5-.4 1.1-.4 1.6-.1l3 1.7c.8.4 1 1.3.5 1.9-1.6 2.2-4.2 3.1-6.9 2.2-5.2-1.7-11.6-8.4-13.3-13.5-.9-2.7.1-5.4 2.2-7 .6-.5 1.5-.3 1.9.4l1.7 3c.3.5.3 1.1-.1 1.6l-1.3 1.9Z" fill="#FFFFFF"/>
+            </svg>`,
+        globe: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <circle cx="32" cy="32" r="20" stroke="#A36AFF" stroke-width="4"/>
+                <path d="M12 32h40M32 12c6 6.1 9 12.9 9 20s-3 14-9 20c-6-6-9-12.8-9-20s3-13.9 9-20Z" stroke="#A36AFF" stroke-width="3.4"/>
+                <path d="M18.5 22c4.3 1.5 8.8 2.2 13.5 2.2 4.7 0 9.2-.7 13.5-2.2M18.5 42c4.3-1.5 8.8-2.2 13.5-2.2 4.7 0 9.2.7 13.5 2.2" stroke="#A36AFF" stroke-width="2.8"/>
+            </svg>`,
+        mapapp: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M15 18.5 26.5 14l11 4 11.5-4v31.5L37.5 50l-11-4L15 50V18.5Z" fill="#F4FAFF"/>
+                <path d="M26.5 14v32M37.5 18v32" stroke="#7CC4FF" stroke-width="3"/>
+                <path d="M32 21c4.7 0 8.2 3.4 8.2 7.9 0 5.7-6.8 13.1-8.2 14.5-1.4-1.4-8.2-8.8-8.2-14.5 0-4.5 3.5-7.9 8.2-7.9Z" fill="#34C759"/>
+                <circle cx="32" cy="28.8" r="3.2" fill="#FFFFFF"/>
+            </svg>`,
+        instagram: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <rect x="14" y="14" width="36" height="36" rx="11" stroke="#FFF5FF" stroke-width="4"/>
+                <circle cx="32" cy="32" r="9" stroke="#FFF5FF" stroke-width="4"/>
+                <circle cx="42.5" cy="21.5" r="2.8" fill="#FFF5FF"/>
+            </svg>`,
+        threads: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M39.5 24.5c-1.2-6-5.9-9.7-12.2-9.7-7.7 0-13.4 5.8-13.4 13.6 0 9 6.7 18 18.5 18 9.8 0 16-5.5 16-13.5 0-7.2-5.1-11.9-12.5-11.9-3.5 0-6.8 1.1-9.1 3.2" stroke="#F3F3F4" stroke-width="4.1" stroke-linecap="round"/>
+                <path d="M27.2 31.5c1.7-1.7 4-2.5 6.3-2.5 4.2 0 7 2.2 7 5.5s-2.5 5.3-6.3 5.3c-3.5 0-5.8-1.6-5.8-4.1 0-2.1 1.6-3.5 4.1-3.5 5.9 0 10.8 2.6 10.8 9.2" stroke="#F3F3F4" stroke-width="3.8"/>
+            </svg>`,
+        bank: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M18 42V24c0-5.2 7-6.6 8.8-1.8 1.7-3.7 6.7-4.5 9.5-1.7 1.6-1.9 4.2-2.9 6.7-2.4 3.4.6 5.6 3.5 5.6 7v17" stroke="#FFFFFF" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M26.8 24v15.8c0 4.8 6.6 6.5 8.7 2.2l.1-.2V22.8" stroke="#FFFFFF" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>`,
+        music: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M42 16v22.5a6.5 6.5 0 1 1-4-6V24.8l-14 3.1v16.6a6.5 6.5 0 1 1-4-6.1V22l22-6Z" fill="#FFFFFF"/>
+            </svg>`,
+        paypal: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M24 15h10.3c6.8 0 11.7 4.2 11.7 9.8 0 5.6-4 10.1-11.2 10.1h-7L24 49h-8l8-34Z" fill="#FFFFFF"/>
+                <path d="M30 19h8.2c4.4 0 7.4 2.6 7.4 6.2 0 4.2-3.1 7.5-8.4 7.5h-5.8L30 41h-6.9l5.7-22Z" fill="#D7EAFF" fill-opacity=".7"/>
+            </svg>`,
+        olx: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M19 21h7c4.7 0 7.5 2.7 7.5 6.7 0 4.1-2.8 6.8-7.5 6.8h-7V21Zm17 0 6 6.3 6.1-6.3h4.5l-8.1 8.3 8.2 8.6H48l-6-6.3-6 6.3h-4.6l8.2-8.5-8.1-8.4H36Z" fill="#FFFFFF"/>
+            </svg>`,
+        tinder: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M37.8 12.4c1.1 7.5-2.3 11.6-6.8 15.5 4.7-1.5 9-.7 12.7 2.9 4.8 4.8 4.5 12.5-.4 17.4-5.4 5.4-13.5 5.8-19.2.2-6-6-5.6-16 1.1-22.2 2.8-2.7 7-4.8 12.6-13.8Z" fill="#FFFFFF"/>
+            </svg>`,
+        note: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <rect x="12" y="11" width="40" height="42" rx="8" fill="#2B1C00"/>
+                <path d="M21 22h20M21 30h22M21 38h18" stroke="#FFF8E0" stroke-width="3.4" stroke-linecap="round"/>
+            </svg>`,
+        ifood: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M19 22.5h8v19h-8v-19Zm11.5 0H38v6h-7.5v3h6.7v5.8h-6.7v4.2h-8V22.5Zm13-.2c6.2 0 10.5 3.8 10.5 9.6 0 6.1-4.4 9.8-10.9 9.8H39V22.3h4.5Z" fill="#FFFFFF"/>
+            </svg>`,
+        uber: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <text x="32" y="38" fill="#FFFFFF" font-size="18" font-family="Arial, sans-serif" font-weight="700" text-anchor="middle">Uber</text>
+            </svg>`,
+        news: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <rect x="10" y="13" width="44" height="38" rx="7" fill="#F5F7FF"/>
+                <rect x="14" y="18" width="12" height="28" rx="2" fill="#2C67E6"/>
+                <path d="M31 22h18M31 28h16M31 34h18M31 40h11" stroke="#59627B" stroke-width="3" stroke-linecap="round"/>
+            </svg>`,
+        diamond: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <rect x="19" y="18" width="26" height="26" rx="3" fill="#F32048"/>
+                <path d="M24 44h16" stroke="#AAB4C8" stroke-width="3" stroke-linecap="round" opacity=".9"/>
+            </svg>`,
+        calculator: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <rect x="14" y="11" width="36" height="42" rx="7" fill="#EFEFEF" stroke="#2D2D2D" stroke-width="4"/>
+                <rect x="21" y="18" width="22" height="8" rx="2" fill="#6B6B6B"/>
+                <g fill="#575757">
+                    <rect x="21" y="31" width="6" height="6" rx="1.5"/>
+                    <rect x="29" y="31" width="6" height="6" rx="1.5"/>
+                    <rect x="37" y="31" width="6" height="6" rx="1.5"/>
+                    <rect x="21" y="39" width="6" height="6" rx="1.5"/>
+                    <rect x="29" y="39" width="6" height="6" rx="1.5"/>
+                    <rect x="37" y="39" width="6" height="6" rx="1.5"/>
+                </g>
+            </svg>`,
+        memo: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <rect x="12" y="11" width="40" height="42" rx="8" fill="#FFF6DD"/>
+                <rect x="12" y="11" width="40" height="10" rx="8" fill="#F6C42C"/>
+                <path d="M20 29h24M20 36h20M20 43h24" stroke="#7A7156" stroke-width="3.2" stroke-linecap="round"/>
+            </svg>`,
+        compass: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <circle cx="32" cy="32" r="16" stroke="#FFFFFF" stroke-width="4"/>
+                <circle cx="32" cy="32" r="3.3" fill="#FFFFFF"/>
+                <path d="M32 22v11" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round"/>
+                <path d="M32 32 39 27" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round"/>
+            </svg>`,
+        taco: `
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M22 33c0-5.8 4.4-10 10-10 5.6 0 10 4.2 10 10 0 6.3-4.5 11-10 11s-10-4.7-10-11Z" fill="#FF2F34"/>
+                <path d="M17 35c0-7.5 6.3-13 15-13 8.8 0 15 5.5 15 13 0 1.7-.3 3.2-.8 4.6H17.8c-.5-1.4-.8-2.9-.8-4.6Z" fill="#E4001E"/>
+                <path d="M25 42h14" stroke="#F1C8A8" stroke-width="3.2" stroke-linecap="round"/>
+            </svg>`
+    };
+
+    const homeApps = [
+        { key: "whatsapp", label: "Zap", icon: "whatsapp", className: "wa", screen: "whatsapp-list" },
+        { key: "maps", label: "Maps", icon: "mapapp", className: "maps", screen: "maps-home" },
+        { key: "instagram", label: "Instagram", icon: "instagram", className: "insta", screen: "instagram-feed" },
+        { key: "threads", label: "Threads", icon: "threads", className: "threads", screen: "threads-home" },
+        { key: "bank", label: "Nubank", icon: "bank", className: "bank", screen: "bank-home" },
+        { key: "music", label: "Music", icon: "music", className: "music", screen: "music-home" },
+        { key: "olx", label: "OLX", icon: "olx", className: "olx", screen: "olx-home" },
+        { key: "tinder", label: "Tinder", icon: "tinder", className: "tinder", screen: "tinder-home" },
+        { key: "notas", label: "Notas", icon: "note", className: "note", screen: "notas-home" },
+        { key: "ifood", label: "iFood", icon: "ifood", className: "ifood", screen: "ifood-home" },
+        { key: "uber", label: "Uber", icon: "uber", className: "uber", screen: "uber-home" },
+        { key: "news", label: "News", icon: "news", className: "news", screen: "news-home" },
+        { key: "bitco", label: "Bitco", icon: "diamond", className: "diamond", screen: "bitco-home" },
+        { key: "calc", label: "Calc", icon: "calculator", className: "calc", screen: "calc-home" },
+        { key: "memo", label: "Anot.", icon: "memo", className: "memo", screen: "memo-home" },
+        { key: "campo", label: "Campo Min.", icon: "compass", className: "compass", screen: "campo-home" }
+    ];
+
+    const singleApp = { key: "taco", label: "Taco", icon: "taco", className: "taco", screen: "taco-home" };
+
+    const whatsappChats = [
+        { id: "mafe", name: "Mafe", preview: "Vi seu story, passa no Nu depois.", time: "00:58", unread: 2, tone: "green" },
+        { id: "suporte", name: "Suporte RP", preview: "Instagram novo liberado no celular.", time: "00:43", unread: 1, tone: "blue" },
+        { id: "bruna", name: "Bruna", preview: "Manda a localizacao quando sair.", time: "Ontem", unread: 0, tone: "pink" },
+        { id: "bank", name: "Nubank", preview: "Seu saldo rende 100% do CDI.", time: "Ontem", unread: 0, tone: "red" }
+    ];
+
+    const whatsappMessages = {
+        mafe: [
+            { from: "them", text: "O celular ficou bonito demais agora.", time: "00:51" },
+            { from: "me", text: "To deixando igual ao original, ja ja fecho tudo.", time: "00:53" },
+            { from: "them", text: "Perfeito. Passa no Nu depois e posta no insta.", time: "00:58" }
+        ],
+        suporte: [
+            { from: "them", text: "WhatsApp, Instagram e Nubank ja estao conectados no launcher.", time: "00:39" },
+            { from: "me", text: "Boa, vou testar tudo no aparelho.", time: "00:43" }
+        ],
+        bruna: [
+            { from: "them", text: "Quando sair me manda a localizacao no Zap.", time: "Ontem" }
+        ],
+        bank: [
+            { from: "them", text: "Seu rendimento diario caiu na conta.", time: "Ontem" }
+        ]
+    };
+
+    const instagramStories = [
+        { name: "nizin", initials: "N", colors: ["#ff9966", "#ff5e62"] },
+        { name: "mafe", initials: "M", colors: ["#9b5cff", "#5d6dff"] },
+        { name: "nubank", initials: "Nu", colors: ["#b03cff", "#7b10cf"] },
+        { name: "taco", initials: "T", colors: ["#28d365", "#16914b"] },
+        { name: "vip", initials: "V", colors: ["#ffbf5a", "#ff7a18"] }
+    ];
+
+    const instagramPosts = [
+        {
+            id: "post-1",
+            user: "nizin.ofc",
+            place: "Centro de Los Santos",
+            likes: 1284,
+            caption: "Layout novo no celular do RP. Tudo abrindo por dentro, igual app original.",
+            badge: "Atualizacao",
+            media: "linear-gradient(145deg, #1b2439 0%, #45558d 28%, #ff6f61 100%)"
+        },
+        {
+            id: "post-2",
+            user: "nubank.rp",
+            place: "Conta digital",
+            likes: 812,
+            caption: "Conta roxa pronta. Pix, cartao e saldo tudo dentro do mesmo app.",
+            badge: "Conta roxa",
+            media: "linear-gradient(145deg, #2a0e47 0%, #7b10cf 48%, #cb8cff 100%)"
+        }
+    ];
+
+    const bankTransactions = [
+        { icon: "NU", title: "Saldo rendendo na conta", subtitle: "Hoje, 01:12", value: "+ R$ 12,74" },
+        { icon: "PX", title: "Pix enviado para Mafe", subtitle: "Hoje, 00:46", value: "- R$ 850,00" },
+        { icon: "CC", title: "Fatura do cartao atualizada", subtitle: "Ontem", value: "R$ 1.842,39" }
+    ];
+
+    const utilityApps = {
+        threads: {
+            title: "Threads",
+            subtitle: "Conversa rapida da cidade",
+            pill: "Social",
+            accent: "#1f2937",
+            accentDeep: "#05070b",
+            bg: "#0f1217",
+            bgDeep: "#050608",
+            hero: {
+                eyebrow: "Agora",
+                title: "Fios da comunidade e atualizacoes do RP",
+                text: "Acompanhe avisos curtos, tendencias da cidade e postagens da madrugada sem sair do celular."
+            },
+            stats: [
+                { value: "1.2k", label: "posts" },
+                { value: "84", label: "online" },
+                { value: "7", label: "fixados" }
+            ],
+            cards: [
+                { eyebrow: "nizin.ofc", title: "Celular novo no ar", text: "WhatsApp, Maps, Music e Nubank agora ficam organizados por app." },
+                { eyebrow: "mod", title: "Anuncio rapido", text: "Use o app News para receber eventos e temas ao vivo do servidor." }
+            ],
+            actions: [
+                { label: "Novo fio", command: "/doc", primary: true },
+                { label: "Regras", command: "/ajuda" }
+            ]
+        },
+        olx: {
+            title: "OLX RP",
+            subtitle: "Classificados da cidade",
+            pill: "Mercado",
+            accent: "#8b5cf6",
+            accentDeep: "#4c1d95",
+            bg: "#120a22",
+            bgDeep: "#07040e",
+            hero: {
+                eyebrow: "Destque",
+                title: "Compra e venda sem sair do carro",
+                text: "Anuncios de veiculos, casas e itens raros com acesso rapido ao ponto do vendedor."
+            },
+            stats: [
+                { value: "143", label: "anuncios" },
+                { value: "12", label: "novos" },
+                { value: "24h", label: "suporte" }
+            ],
+            cards: [
+                { eyebrow: "Veiculo", title: "Sultan 2.0", text: "R$ 89.000 | falar com Joao no Centro" },
+                { eyebrow: "Imovel", title: "Casa no Vinewood", text: "Garagem dupla, portao e vista para o lago." }
+            ],
+            actions: [
+                { label: "Abrir loja", command: "/loja", primary: true },
+                { label: "Trazer rota", command: "/gps" }
+            ]
+        },
+        tinder: {
+            title: "Tinder",
+            subtitle: "Perfis por perto",
+            pill: "Match",
+            accent: "#fb7185",
+            accentDeep: "#be123c",
+            bg: "#19070b",
+            bgDeep: "#090304",
+            hero: {
+                eyebrow: "Noite",
+                title: "Matches, likes e convites da madrugada",
+                text: "Veja quem esta por perto, combine uma rota e solte a localizacao direto no Zap."
+            },
+            stats: [
+                { value: "12", label: "perfis" },
+                { value: "3", label: "likes" },
+                { value: "2", label: "matches" }
+            ],
+            cards: [
+                { eyebrow: "Mafe, 21", title: "Centro de LS", text: "Curte roleplay, corrida e foto no espelho do carro." },
+                { eyebrow: "Bianca, 24", title: "Praia", text: "Topa encontrar no restaurante Taco depois do servidor." }
+            ],
+            actions: [
+                { label: "Mandar local", command: "/gps", primary: true },
+                { label: "Abrir chat", screen: "whatsapp-list" }
+            ]
+        },
+        notas: {
+            title: "Notas",
+            subtitle: "Checklist do dia",
+            pill: "Planner",
+            accent: "#f59e0b",
+            accentDeep: "#b45309",
+            bg: "#1b1404",
+            bgDeep: "#090602",
+            hero: {
+                eyebrow: "Hoje",
+                title: "Tudo importante antes de sair para a cidade",
+                text: "Guardar dinheiro no Nu, mandar rota no Maps e responder o grupo do suporte."
+            },
+            stats: [
+                { value: "05", label: "tarefas" },
+                { value: "02", label: "urgentes" },
+                { value: "sync", label: "local" }
+            ],
+            cards: [
+                { eyebrow: "01", title: "Passar no banco", text: "Separar saldo para combustivel e compras da noite." },
+                { eyebrow: "02", title: "Verificar inventory", text: "Conferir celular, chave, documento e lockpick." }
+            ],
+            actions: [
+                { label: "Abrir docs", command: "/doc", primary: true },
+                { label: "Inventario", action: "inventory" }
+            ]
+        },
+        ifood: {
+            title: "iFood",
+            subtitle: "Entrega rapida",
+            pill: "Delivery",
+            accent: "#ef4444",
+            accentDeep: "#991b1b",
+            bg: "#1a0909",
+            bgDeep: "#090303",
+            hero: {
+                eyebrow: "Promo",
+                title: "Hamburguer, pizza e combo para madrugada",
+                text: "Peca dentro do celular e acompanhe a entrega com tempo, cupom e rota."
+            },
+            stats: [
+                { value: "18m", label: "tempo" },
+                { value: "R$15", label: "cupom" },
+                { value: "23", label: "lojas" }
+            ],
+            cards: [
+                { eyebrow: "Burger House", title: "Combo duplo + refri", text: "Entrega em 18 min | frete gratis" },
+                { eyebrow: "Taco Express", title: "Kit da madrugada", text: "2 tacos, fritas e molho especial." }
+            ],
+            actions: [
+                { label: "Rastrear", command: "/gps", primary: true },
+                { label: "Pedir", command: "/atm" }
+            ]
+        },
+        uber: {
+            title: "Uber",
+            subtitle: "Corrida e rota",
+            pill: "Ride",
+            accent: "#111827",
+            accentDeep: "#020617",
+            bg: "#0b0d12",
+            bgDeep: "#030406",
+            hero: {
+                eyebrow: "Chegada",
+                title: "Seu motorista esta a 4 minutos",
+                text: "Rota para o Centro ja pronta com estimativa, valor e placa visiveis."
+            },
+            stats: [
+                { value: "4 min", label: "eta" },
+                { value: "R$21", label: "preco" },
+                { value: "LS-9021", label: "placa" }
+            ],
+            cards: [
+                { eyebrow: "Motorista", title: "Carlos | Prisma preto", text: "4.98 estrelas | chegando pela avenida principal." },
+                { eyebrow: "Parada", title: "Delegacia Central", text: "Trajeto rapido ativado com desvio leve no Centro." }
+            ],
+            actions: [
+                { label: "Chamar", command: "/casa", primary: true },
+                { label: "Trazer rota", command: "/gps" }
+            ]
+        },
+        news: {
+            title: "News",
+            subtitle: "Painel oficial do servidor",
+            pill: "Live",
+            accent: "#3b82f6",
+            accentDeep: "#1d4ed8",
+            bg: "#08101f",
+            bgDeep: "#02050b",
+            hero: {
+                eyebrow: "Agora",
+                title: "Anuncios, eventos e tema ao vivo",
+                text: "Acompanhe tudo em tempo real sem sair do celular ou precisar relogar no servidor."
+            },
+            stats: [
+                { value: "04", label: "eventos" },
+                { value: "WS", label: "sync" },
+                { value: "CDN", label: "ativos" }
+            ],
+            cards: [
+                { eyebrow: "Malha", title: "Status do live sync", text: "As mensagens globais aparecem aqui e no hub do celular." },
+                { eyebrow: "Evento", title: "Noite premium", text: "Tema visual e anuncios podem mudar em tempo real." }
+            ],
+            actions: [
+                { label: "Tema azul", liveTheme: "blue", primary: true },
+                { label: "Tema amber", liveTheme: "amber" },
+                { label: "Anunciar", liveAnnounce: true }
+            ]
+        },
+        bitco: {
+            title: "Bitco",
+            subtitle: "Carteira digital",
+            pill: "Crypto",
+            accent: "#e11d48",
+            accentDeep: "#7f1d1d",
+            bg: "#14070b",
+            bgDeep: "#060304",
+            hero: {
+                eyebrow: "Wallet",
+                title: "Saldo, variacao e ordens rapidas",
+                text: "Acompanhe a carteira da cidade e mande fundos para sua conta principal."
+            },
+            stats: [
+                { value: "0.482", label: "btc" },
+                { value: "+8.2%", label: "24h" },
+                { value: "R$ 182k", label: "saldo" }
+            ],
+            cards: [
+                { eyebrow: "Mercado", title: "Alta nas ultimas horas", text: "Movimento forte desde a abertura da madrugada." },
+                { eyebrow: "Transferencia", title: "Enviar para Nubank", text: "Converta saldo e leve para a conta roxa quando quiser." }
+            ],
+            actions: [
+                { label: "Comprar", command: "/loja", primary: true },
+                { label: "Vender", command: "/atm" }
+            ]
+        },
+        memo: {
+            title: "Anotacoes",
+            subtitle: "Blocos rapidos",
+            pill: "Memo",
+            accent: "#facc15",
+            accentDeep: "#ca8a04",
+            bg: "#1b1608",
+            bgDeep: "#090703",
+            hero: {
+                eyebrow: "Fixado",
+                title: "Informacoes que voce consulta toda hora",
+                text: "Codigos, enderecos, apelidos e lembretes rapidos organizados em um unico lugar."
+            },
+            stats: [
+                { value: "03", label: "blocos" },
+                { value: "12", label: "linhas" },
+                { value: "local", label: "sync" }
+            ],
+            cards: [
+                { eyebrow: "Garagem", title: "Elegy prata", text: "Placa LSX-1124 | vaga 14 do predio." },
+                { eyebrow: "Contato", title: "Suporte RP", text: "Chamar no Zap antes das atualizacoes grandes." }
+            ],
+            actions: [
+                { label: "Salvar docs", command: "/doc", primary: true },
+                { label: "Copiar rota", command: "/gps" }
+            ]
+        },
+        campo: {
+            title: "Campo Min.",
+            subtitle: "Radar de risco",
+            pill: "Tatico",
+            accent: "#ef4444",
+            accentDeep: "#991b1b",
+            bg: "#170809",
+            bgDeep: "#090304",
+            hero: {
+                eyebrow: "Arena",
+                title: "Leia o terreno antes de entrar na area quente",
+                text: "Resumo rapido de risco, saida segura e suporte no ponto mais proximo."
+            },
+            stats: [
+                { value: "24", label: "zonas" },
+                { value: "03", label: "seguras" },
+                { value: "x4.2", label: "bonus" }
+            ],
+            cards: [
+                { eyebrow: "Risco", title: "Centro em alerta medio", text: "Movimento intenso, mantenha rota curta e saida aberta." },
+                { eyebrow: "Suporte", title: "Base tatica ativa", text: "Equipe disponivel no bairro ao lado." }
+            ],
+            actions: [
+                { label: "Abrir ajuda", command: "/ajuda", primary: true },
+                { label: "Trazer rota", command: "/gps" }
+            ]
+        },
+        taco: {
+            title: "Taco",
+            subtitle: "Lanchonete oficial",
+            pill: "Food",
+            accent: "#dc2626",
+            accentDeep: "#991b1b",
+            bg: "#190808",
+            bgDeep: "#070202",
+            hero: {
+                eyebrow: "Delivery",
+                title: "Seu combo favorito direto no celular",
+                text: "Peça tacos, acompanhe a entrega e solte animacao de refeicao sem sair da home."
+            },
+            stats: [
+                { value: "12m", label: "entrega" },
+                { value: "4.9", label: "avaliacao" },
+                { value: "24h", label: "aberto" }
+            ],
+            cards: [
+                { eyebrow: "Combo", title: "2 tacos + fritas", text: "Pedido mais vendido nas madrugadas do servidor." },
+                { eyebrow: "Retirada", title: "Loja do Centro", text: "Retire no balcao ou envie rota para o motorista." }
+            ],
+            actions: [
+                { label: "Animacao", command: "/anim", primary: true },
+                { label: "Ver rota", command: "/gps" }
+            ]
+        }
+    };
+
+    const recentMeta = {
+        whatsapp: { label: "WhatsApp", preview: "Conversas, chat e respostas locais." },
+        maps: { label: "Maps", preview: "Mapa do jogo, rota, zoom e atalhos rapidos." },
+        instagram: { label: "Instagram", preview: "Stories, feed, likes e acesso VIP." },
+        threads: { label: "Threads", preview: "Fios curtos da comunidade da cidade." },
+        bank: { label: "Nubank", preview: "Conta roxa, pix, cartao e atalhos." },
+        music: { label: "Music", preview: "Radio com audio 3D e salas diferentes." },
+        olx: { label: "OLX", preview: "Classificados, vendas e rota ate o vendedor." },
+        tinder: { label: "Tinder", preview: "Perfis, likes e localizacao rapida." },
+        notas: { label: "Notas", preview: "Checklist e tarefas do dia." },
+        ifood: { label: "iFood", preview: "Pedidos e acompanhamento da entrega." },
+        uber: { label: "Uber", preview: "Corrida ativa com ETA e rota." },
+        news: { label: "News", preview: "Anuncios, tema e live sync." },
+        bitco: { label: "Bitco", preview: "Carteira digital e variacao da madrugada." },
+        calc: { label: "Calc", preview: "Calculadora funcional dentro do celular." },
+        memo: { label: "Anotacoes", preview: "Blocos e lembretes fixados." },
+        campo: { label: "Campo Min.", preview: "Painel tatico com risco e suporte." },
+        taco: { label: "Taco", preview: "Lanchonete com rota e animacao." }
+    };
+
+    const topLevelScreens = {
+        "whatsapp-list": "whatsapp",
+        "whatsapp-chat": "whatsapp",
+        "instagram-feed": "instagram",
+        "bank-home": "bank",
+        "maps-home": "maps",
+        "music-home": "music",
+        "threads-home": "threads",
+        "olx-home": "olx",
+        "tinder-home": "tinder",
+        "notas-home": "notas",
+        "ifood-home": "ifood",
+        "uber-home": "uber",
+        "news-home": "news",
+        "bitco-home": "bitco",
+        "calc-home": "calc",
+        "memo-home": "memo",
+        "campo-home": "campo",
+        "taco-home": "taco"
+    };
+
+    const topLevelEntryScreen = {
+        whatsapp: "whatsapp-list",
+        maps: "maps-home",
+        instagram: "instagram-feed",
+        threads: "threads-home",
+        bank: "bank-home",
+        music: "music-home",
+        olx: "olx-home",
+        tinder: "tinder-home",
+        notas: "notas-home",
+        ifood: "ifood-home",
+        uber: "uber-home",
+        news: "news-home",
+        bitco: "bitco-home",
+        calc: "calc-home",
+        memo: "memo-home",
+        campo: "campo-home",
+        taco: "taco-home"
+    };
+
+    const state = {
+        history: ["home"],
+        recentsVisible: false,
+        recentApps: [],
+        activeChatId: "mafe",
+        likedPosts: new Set(),
+        bankTab: "overview",
+        bankBalanceVisible: true,
+        liveAnnouncement: "Maps no celular, audio ativo e sync ao vivo",
+        mapZoom: 1.08,
+        calcDisplay: "0",
+        calcStoredValue: null,
+        calcOperator: null,
+        calcReplaceDisplay: false
+    };
+
+    let toastTimer = null;
+    let phoneMapController = null;
+    let phoneAudioStudio = null;
+    let audioMeterTimer = null;
+    let overlayVisible = true;
+    let runtimeHudCacheKey = "";
+    let recentsCacheKey = "";
+    let lastClockValue = "";
+    let musicShouldResume = false;
+
+    function currentScreen() {
+        return state.history[state.history.length - 1];
+    }
+
+    function callBridge(method, ...args) {
+        if (!bridge || typeof bridge[method] !== "function") {
+            return null;
+        }
+        try {
+            return bridge[method](...args);
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function showPreviewToast(text) {
+        const toast = document.getElementById("previewToast");
+        toast.textContent = text;
+        toast.classList.add("visible");
+        if (toastTimer) {
+            clearTimeout(toastTimer);
+        }
+        toastTimer = setTimeout(() => {
+            toast.classList.remove("visible");
+        }, 1300);
+    }
+
+    function dispatchCommand(command, label) {
+        if (command) {
+            callBridge("runCommand", command);
+        }
+        if (isPreview) {
+            showPreviewToast(label || command || "Comando executado");
+        }
+    }
+
+    function openInventory() {
+        callBridge("openInventory");
+        if (isPreview) {
+            showPreviewToast("Inventario acionado");
+        }
+    }
+
+    function closePhone() {
+        callBridge("closePhone");
+        if (isPreview) {
+            showPreviewToast("Fechar celular");
+        }
+    }
+
+    function rememberRecent(screen) {
+        const appKey = topLevelScreens[screen];
+        if (!appKey) {
+            return;
+        }
+        state.recentApps = [appKey, ...state.recentApps.filter((item) => item !== appKey)].slice(0, 4);
+    }
+
+    function goHome() {
+        state.history = ["home"];
+        state.recentsVisible = false;
+        render();
+    }
+
+    function openScreen(screen) {
+        if (currentScreen() === screen) {
+            return;
+        }
+        state.history.push(screen);
+        state.recentsVisible = false;
+        rememberRecent(screen);
+        render();
+    }
+
+    function goBack() {
+        if (state.recentsVisible) {
+            state.recentsVisible = false;
+            render();
+            return;
+        }
+
+        if (state.history.length > 1) {
+            state.history.pop();
+            render();
+            return;
+        }
+
+        closePhone();
+    }
+
+    function toggleRecents() {
+        state.recentsVisible = !state.recentsVisible;
+        renderRecents();
+    }
+
+    function activateApp(config) {
+        if (config.screen) {
+            openScreen(config.screen);
+            return;
+        }
+        if (config.mode === "inventory") {
+            openInventory();
+            return;
+        }
+        if (config.command) {
+            dispatchCommand(config.command, `${config.label || "App"} acionado`);
+        }
+    }
+
+    function buildHomeButton(config, className) {
+        const button = document.createElement("button");
+        button.className = className;
+        button.type = "button";
+        button.dataset.appKey = config.key;
+        button.setAttribute("aria-label", config.label || "Atalho");
+        button.innerHTML = `
+            <div class="icon-tile ${config.className}">${iconLibrary[config.icon] || ""}</div>
+            ${config.label ? `<span class="app-label">${config.label}</span>` : ""}
+        `;
+        return button;
+    }
+
+    function renderHome() {
+        const grid = document.getElementById("appsGrid");
+        const single = document.getElementById("singleApp");
+        grid.innerHTML = "";
+        single.innerHTML = "";
+
+        homeApps.forEach((app) => grid.appendChild(buildHomeButton(app, "app")));
+        single.appendChild(buildHomeButton(singleApp, "app"));
+    }
+
+    function getChatData() {
+        return whatsappChats.find((chat) => chat.id === state.activeChatId) || whatsappChats[0];
+    }
+
+    function renderWhatsAppList() {
+        return `
+            <section class="app-window whatsapp-window">
+                <div class="app-body">
+                    <header class="app-topbar whatsapp-topbar">
+                        <div>
+                            <div class="whatsapp-title">WhatsApp</div>
+                            <div class="app-subtitle">Conectado ao celular do RP</div>
+                        </div>
+                        <div class="app-tools">
+                            <span class="mini-line"></span>
+                            <span class="mini-dot"></span>
+                            <span class="mini-dot"></span>
+                        </div>
+                    </header>
+                    <div class="wa-tabs">
+                        <span class="active">Chats</span>
+                        <span>Status</span>
+                        <span>Calls</span>
+                        <span>Info</span>
+                    </div>
+                    <div class="wa-list">
+                        ${whatsappChats.map((chat) => `
+                            <button class="wa-chat-row" type="button" data-chat-id="${chat.id}">
+                                <span class="wa-avatar ${chat.tone}">${chat.name.slice(0, 1)}</span>
+                                <span class="wa-main">
+                                    <strong class="wa-name">${chat.name}</strong>
+                                    <span class="wa-preview">${chat.preview}</span>
+                                </span>
+                                <span class="wa-meta">
+                                    <span class="wa-time">${chat.time}</span>
+                                    ${chat.unread ? `<span class="wa-badge">${chat.unread}</span>` : `<span></span>`}
+                                </span>
+                            </button>
+                        `).join("")}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    function renderWhatsAppChat() {
+        const chat = getChatData();
+        const messages = whatsappMessages[chat.id] || [];
+        return `
+            <section class="app-window whatsapp-window">
+                <section class="wa-chat-screen">
+                    <header class="wa-chat-top">
+                        <button class="surface-button" type="button" data-nav="back">‹</button>
+                        <div>
+                            <div class="whatsapp-title">${chat.name}</div>
+                            <div class="app-subtitle">online agora</div>
+                        </div>
+                        <div class="app-tools">
+                            <span class="mini-dot"></span>
+                            <span class="mini-dot"></span>
+                        </div>
+                    </header>
+                    <div class="wa-thread">
+                        ${messages.map((message) => `
+                            <div class="wa-message ${message.from}">
+                                ${message.text}
+                                <small>${message.time}</small>
+                            </div>
+                        `).join("")}
+                    </div>
+                    <div>
+                        <div class="wa-quick-row">
+                            <button class="mini-action" type="button" data-quick-reply="Partiu Nu agora.">Nu</button>
+                            <button class="mini-action" type="button" data-quick-reply="Te mando no insta ja.">Insta</button>
+                            <button class="mini-action" type="button" data-command="/gps">Local</button>
+                        </div>
+                        <form class="wa-composer" data-chat-form>
+                            <input class="wa-input" id="waDraft" type="text" placeholder="Mensagem..." autocomplete="off">
+                            <button class="wa-send" type="submit">OK</button>
+                        </form>
+                    </div>
+                </section>
+            </section>
+        `;
+    }
+
+    function renderInstagram() {
+        return `
+            <section class="app-window instagram-window">
+                <div class="app-body">
+                    <header class="app-topbar ig-topbar">
+                        <div class="ig-logo">Instagram</div>
+                        <div class="app-tools" style="color:#141519;">
+                            <span class="mini-dot"></span>
+                            <span class="mini-line"></span>
+                            <span class="mini-dot"></span>
+                        </div>
+                    </header>
+                    <div class="ig-stories">
+                        ${instagramStories.map((story) => `
+                            <button class="ig-story" type="button" data-command="/loja">
+                                <span class="ig-ring">
+                                    <span class="ig-ring-inner">
+                                        <span class="ig-avatar" style="background:linear-gradient(135deg, ${story.colors[0]}, ${story.colors[1]});">${story.initials}</span>
+                                    </span>
+                                </span>
+                                <span>${story.name}</span>
+                            </button>
+                        `).join("")}
+                    </div>
+                    <div class="ig-feed">
+                        ${instagramPosts.map((post) => {
+                            const liked = state.likedPosts.has(post.id);
+                            const likes = liked ? post.likes + 1 : post.likes;
+                            return `
+                                <article class="ig-post">
+                                    <header class="ig-post-head">
+                                        <span class="wa-avatar pink" style="width:24px;height:24px;font-size:7px;">${post.user.slice(0, 1).toUpperCase()}</span>
+                                        <div>
+                                            <strong>${post.user}</strong>
+                                            <small>${post.place}</small>
+                                        </div>
+                                        <span class="ig-icon">•••</span>
+                                    </header>
+                                    <div class="ig-post-media" style="background:${post.media};">
+                                        <span class="ig-media-badge">${post.badge}</span>
+                                    </div>
+                                    <div class="ig-post-actions">
+                                        <div class="ig-action-left">
+                                            <button class="ig-icon ${liked ? "liked" : ""}" type="button" data-like-post="${post.id}">♥</button>
+                                            <button class="ig-icon" type="button">◦</button>
+                                            <button class="ig-icon" type="button">↗</button>
+                                        </div>
+                                        <button class="ig-icon" type="button">⌑</button>
+                                    </div>
+                                    <div class="ig-copy">
+                                        <div class="ig-likes">${likes.toLocaleString("pt-BR")} curtidas</div>
+                                        <div class="ig-caption"><strong>${post.user}</strong>${post.caption}</div>
+                                        <div class="ig-chip-row">
+                                            <button class="ig-chip" type="button" data-command="/loja">Loja VIP</button>
+                                            <button class="ig-chip" type="button" data-command="/gps">Local</button>
+                                            <button class="ig-chip" type="button" data-command="/doc">Perfil RP</button>
+                                        </div>
+                                    </div>
+                                </article>
+                            `;
+                        }).join("")}
+                    </div>
+                    <footer class="ig-bottom-nav">
+                        <span>⌂</span>
+                        <span>⌕</span>
+                        <span>＋</span>
+                        <span>♥</span>
+                        <span>◎</span>
+                    </footer>
+                </div>
+            </section>
+        `;
+    }
+
+    function renderBank() {
+        const hiddenBalance = "R$ •••••";
+        const balance = state.bankBalanceVisible ? "R$ 28.540,90" : hiddenBalance;
+        const content = state.bankTab === "pix"
+            ? `
+                <div class="bank-action-grid">
+                    <button class="bank-action-card bank-command" type="button" data-command="/atm">
+                        <small>Pix</small>
+                        <strong>Transferir agora</strong>
+                    </button>
+                    <button class="bank-action-card bank-command" type="button" data-command="/doc">
+                        <small>Docs</small>
+                        <strong>Identidade bancaria</strong>
+                    </button>
+                    <button class="bank-action-card bank-command" type="button" data-command="/gps">
+                        <small>Mapa</small>
+                        <strong>Agencias proximas</strong>
+                    </button>
+                    <button class="bank-action-card bank-command" type="button" data-command="/casa">
+                        <small>Casa</small>
+                        <strong>Pagar propriedade</strong>
+                    </button>
+                </div>
+                <button class="bank-primary" type="button" data-command="/atm">Abrir ATM</button>
+            `
+            : state.bankTab === "cards"
+                ? `
+                    <div class="bank-row">
+                        <div class="bank-mini-card">
+                            <small>Cartao</small>
+                            <strong>Final 0931</strong>
+                        </div>
+                        <div class="bank-mini-card">
+                            <small>Limite</small>
+                            <strong>R$ 12.000</strong>
+                        </div>
+                        <div class="bank-mini-card">
+                            <small>Fatura</small>
+                            <strong>R$ 1.842</strong>
+                        </div>
+                    </div>
+                    <div class="bank-list">
+                        <div class="bank-item">
+                            <span class="bank-item-icon">CR</span>
+                            <div><strong>Credito disponivel</strong><small>Atualizado agora</small></div>
+                            <span class="bank-item-value">R$ 10.158</span>
+                        </div>
+                        <div class="bank-item">
+                            <span class="bank-item-icon">PT</span>
+                            <div><strong>Parcelas em aberto</strong><small>2 ativas</small></div>
+                            <span class="bank-item-value">R$ 620</span>
+                        </div>
+                    </div>
+                    <button class="bank-primary" type="button" data-command="/atm">Gerenciar conta</button>
+                `
+                : `
+                    <div class="bank-row">
+                        <div class="bank-mini-card">
+                            <small>Pix</small>
+                            <strong>Disponivel</strong>
+                        </div>
+                        <div class="bank-mini-card">
+                            <small>Limite</small>
+                            <strong>R$ 12.000</strong>
+                        </div>
+                        <div class="bank-mini-card">
+                            <small>Conta</small>
+                            <strong>Premium</strong>
+                        </div>
+                    </div>
+                    <div class="bank-action-grid">
+                        <button class="bank-action-card bank-command" type="button" data-command="/atm">
+                            <small>Atalho</small>
+                            <strong>Acessar ATM</strong>
+                        </button>
+                        <button class="bank-action-card bank-command" type="button" data-command="/loja">
+                            <small>VIP</small>
+                            <strong>Loja bancaria</strong>
+                        </button>
+                        <button class="bank-action-card bank-command" type="button" data-command="/doc">
+                            <small>Docs</small>
+                            <strong>Extrato rapido</strong>
+                        </button>
+                        <button class="bank-action-card bank-command" type="button" data-command="/casa">
+                            <small>Casa</small>
+                            <strong>Pagamentos</strong>
+                        </button>
+                    </div>
+                    <div class="bank-list">
+                        ${bankTransactions.map((item) => `
+                            <div class="bank-item">
+                                <span class="bank-item-icon">${item.icon}</span>
+                                <div>
+                                    <strong>${item.title}</strong>
+                                    <small>${item.subtitle}</small>
+                                </div>
+                                <span class="bank-item-value">${item.value}</span>
+                            </div>
+                        `).join("")}
+                    </div>
+                    <button class="bank-primary" type="button" data-command="/atm">Entrar no Bank</button>
+                `;
+
+        return `
+            <section class="app-window bank-window">
+                <div class="app-body">
+                    <header class="app-topbar bank-topbar">
+                        <div style="display:flex;align-items:center;gap:7px;">
+                            <span class="bank-mark">B</span>
+                            <div>
+                                <div class="app-title">BANK</div>
+                                <div class="app-subtitle">Conta principal conectada</div>
+                            </div>
+                        </div>
+                        <div class="app-tools">
+                            <span class="mini-dot"></span>
+                            <span class="mini-line"></span>
+                            <span class="mini-dot"></span>
+                        </div>
+                    </header>
+                    <div class="bank-shell">
+                        <div class="bank-tabs">
+                            <button class="bank-tab ${state.bankTab === "overview" ? "active" : ""}" type="button" data-bank-tab="overview">Resumo</button>
+                            <button class="bank-tab ${state.bankTab === "pix" ? "active" : ""}" type="button" data-bank-tab="pix">Pix</button>
+                            <button class="bank-tab ${state.bankTab === "cards" ? "active" : ""}" type="button" data-bank-tab="cards">Cartao</button>
+                        </div>
+                        <section class="bank-card">
+                            <small>Saldo disponivel</small>
+                            <div class="bank-balance-row">
+                                <div class="bank-balance">${balance}</div>
+                                <button class="bank-toggle" type="button" data-bank-toggle="balance">${state.bankBalanceVisible ? "Ocultar" : "Mostrar"}</button>
+                            </div>
+                        </section>
+                        ${content}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    function renderNubank() {
+        const hiddenBalance = "R$ •••••";
+        const balance = state.bankBalanceVisible ? "R$ 28.540,90" : hiddenBalance;
+        const content = state.bankTab === "pix"
+            ? `
+                <div class="bank-row">
+                    <div class="bank-mini-card">
+                        <small>Chave</small>
+                        <strong>cpf e telefone ativos</strong>
+                    </div>
+                    <div class="bank-mini-card">
+                        <small>Cobrar</small>
+                        <strong>gerar qr code na hora</strong>
+                    </div>
+                    <div class="bank-mini-card">
+                        <small>Extrato</small>
+                        <strong>ultimos pix salvos</strong>
+                    </div>
+                </div>
+                <div class="bank-action-grid">
+                    <button class="bank-action-card bank-command" type="button" data-command="/atm">
+                        <small>Area Pix</small>
+                        <strong>transferir agora</strong>
+                    </button>
+                    <button class="bank-action-card bank-command" type="button" data-command="/doc">
+                        <small>Copia e cola</small>
+                        <strong>colar codigo pix</strong>
+                    </button>
+                    <button class="bank-action-card bank-command" type="button" data-command="/gps">
+                        <small>Receber</small>
+                        <strong>mostrar qr code</strong>
+                    </button>
+                    <button class="bank-action-card bank-command" type="button" data-command="/casa">
+                        <small>Depositar</small>
+                        <strong>mover dinheiro</strong>
+                    </button>
+                </div>
+                <button class="bank-primary" type="button" data-command="/atm">Ir para area Pix</button>
+            `
+            : state.bankTab === "cards"
+                ? `
+                    <div class="bank-row">
+                        <div class="bank-mini-card">
+                            <small>Cartao</small>
+                            <strong>final 0931</strong>
+                        </div>
+                        <div class="bank-mini-card">
+                            <small>Limite</small>
+                            <strong>R$ 12.000,00</strong>
+                        </div>
+                        <div class="bank-mini-card">
+                            <small>Fatura</small>
+                            <strong>R$ 1.842,39</strong>
+                        </div>
+                    </div>
+                    <div class="bank-list">
+                        <div class="bank-item">
+                            <span class="bank-item-icon">CV</span>
+                            <div><strong>Cartao virtual ativo</strong><small>compra online pronta</small></div>
+                            <span class="bank-item-value">ok</span>
+                        </div>
+                        <div class="bank-item">
+                            <span class="bank-item-icon">FT</span>
+                            <div><strong>Fechamento da fatura</strong><small>vence em 7 dias</small></div>
+                            <span class="bank-item-value">R$ 620,13</span>
+                        </div>
+                    </div>
+                    <button class="bank-primary" type="button" data-command="/atm">Ver meu cartao</button>
+                `
+                : `
+                    <div class="bank-row">
+                        <div class="bank-mini-card">
+                            <small>Caixinha</small>
+                            <strong>meta viagem ativa</strong>
+                        </div>
+                        <div class="bank-mini-card">
+                            <small>Cartao</small>
+                            <strong>limite R$ 12.000</strong>
+                        </div>
+                        <div class="bank-mini-card">
+                            <small>Pix</small>
+                            <strong>disponivel 24h</strong>
+                        </div>
+                    </div>
+                    <div class="bank-action-grid">
+                        <button class="bank-action-card bank-command" type="button" data-command="/atm">
+                            <small>Conta</small>
+                            <strong>acompanhar saldo</strong>
+                        </button>
+                        <button class="bank-action-card bank-command" type="button" data-command="/loja">
+                            <small>Cartao</small>
+                            <strong>ajustar limite</strong>
+                        </button>
+                        <button class="bank-action-card bank-command" type="button" data-command="/doc">
+                            <small>Pix</small>
+                            <strong>transferir ou cobrar</strong>
+                        </button>
+                        <button class="bank-action-card bank-command" type="button" data-command="/casa">
+                            <small>Descubra</small>
+                            <strong>novas funcoes roxas</strong>
+                        </button>
+                    </div>
+                    <div class="bank-list">
+                        ${bankTransactions.map((item) => `
+                            <div class="bank-item">
+                                <span class="bank-item-icon">${item.icon}</span>
+                                <div>
+                                    <strong>${item.title}</strong>
+                                    <small>${item.subtitle}</small>
+                                </div>
+                                <span class="bank-item-value">${item.value}</span>
+                            </div>
+                        `).join("")}
+                    </div>
+                    <button class="bank-primary" type="button" data-command="/atm">Acessar minha conta</button>
+                `;
+
+        return `
+            <section class="app-window bank-window">
+                <div class="app-body">
+                    <header class="app-topbar bank-topbar">
+                        <div class="bank-header-row">
+                            <span class="bank-mark"><span>Nu</span></span>
+                            <div class="bank-toolset">
+                                <span class="bank-tool">?</span>
+                                <span class="bank-tool">$</span>
+                                <span class="bank-tool">+</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="app-title">Ola, Diogo</div>
+                            <div class="app-subtitle">Conta Nubank conectada no celular RP</div>
+                        </div>
+                    </header>
+                    <div class="bank-shell">
+                        <div class="bank-tabs">
+                            <button class="bank-tab ${state.bankTab === "overview" ? "active" : ""}" type="button" data-bank-tab="overview">Conta</button>
+                            <button class="bank-tab ${state.bankTab === "pix" ? "active" : ""}" type="button" data-bank-tab="pix">Pix</button>
+                            <button class="bank-tab ${state.bankTab === "cards" ? "active" : ""}" type="button" data-bank-tab="cards">Cartao</button>
+                        </div>
+                        <section class="bank-card">
+                            <small>Conta</small>
+                            <div class="bank-balance-row">
+                                <div class="bank-balance">${balance}</div>
+                                <button class="bank-toggle" type="button" data-bank-toggle="balance">${state.bankBalanceVisible ? "Ocultar" : "Mostrar"}</button>
+                            </div>
+                            <div class="bank-caption">Saldo disponivel para movimentar agora</div>
+                        </section>
+                        ${content}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    function renderActionAttributes(action) {
+        const attrs = [];
+        if (action.command) {
+            attrs.push(`data-command="${action.command}"`);
+        }
+        if (action.screen) {
+            attrs.push(`data-open-screen="${action.screen}"`);
+        }
+        if (action.action === "inventory") {
+            attrs.push("data-open-inventory=\"true\"");
+        }
+        if (action.liveTheme) {
+            attrs.push(`data-live-theme="${action.liveTheme}"`);
+        }
+        if (action.liveAnnounce) {
+            attrs.push("data-live-announce=\"true\"");
+        }
+        return attrs.join(" ");
+    }
+
+    function renderUtilityApp(appKey) {
+        const config = utilityApps[appKey];
+        if (!config) {
+            return "";
+        }
+
+        const cards = config.cards.map((card) => `
+            <article class="utility-card">
+                <small>${card.eyebrow}</small>
+                <strong>${card.title}</strong>
+                <p>${card.text}</p>
+            </article>
+        `).join("");
+
+        const actions = config.actions.map((action) => `
+            <button class="utility-button ${action.primary ? "primary" : ""}" type="button" ${renderActionAttributes(action)}>${action.label}</button>
+        `).join("");
+
+        const newsBanner = appKey === "news"
+            ? `
+                <div class="utility-banner">
+                    <strong style="display:block;font-size:8px;margin-bottom:4px;color:#fff;">Status ao vivo</strong>
+                    <span id="opsStatusCopy">${state.liveAnnouncement}</span>
+                </div>
+            `
+            : "";
+
+        return `
+            <section
+                class="app-window utility-window"
+                style="--utility-accent:${config.accent};--utility-accent-deep:${config.accentDeep};--utility-bg:${config.bg};--utility-bg-deep:${config.bgDeep};"
+            >
+                <div class="app-body">
+                    <header class="app-topbar utility-topbar">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="utility-pulse"></span>
+                            <div>
+                                <div class="app-title">${config.title}</div>
+                                <div class="app-subtitle">${config.subtitle}</div>
+                            </div>
+                        </div>
+                        <div class="live-screen-pill">${config.pill}</div>
+                    </header>
+                    <div class="utility-shell">
+                        <section class="utility-hero">
+                            <span class="utility-eyebrow">${config.hero.eyebrow}</span>
+                            <strong>${config.hero.title}</strong>
+                            <p>${config.hero.text}</p>
+                        </section>
+                        <section class="utility-stat-grid">
+                            ${config.stats.map((item) => `
+                                <article class="utility-stat">
+                                    <strong>${item.value}</strong>
+                                    <span>${item.label}</span>
+                                </article>
+                            `).join("")}
+                        </section>
+                        ${newsBanner}
+                        <section class="utility-card-grid">${cards}</section>
+                        <section class="utility-actions">${actions}</section>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    function renderMapsHome() {
+        return `
+            <section
+                class="app-window utility-window"
+                style="--utility-accent:#34c759;--utility-accent-deep:#167b41;--utility-bg:#081118;--utility-bg-deep:#02060a;"
+            >
+                <div class="app-body">
+                    <header class="app-topbar utility-topbar">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="utility-pulse" style="background:radial-gradient(circle at 35% 30%, rgba(255,255,255,0.4), transparent 36%), #34c759;"></span>
+                            <div>
+                                <div class="app-title">Maps</div>
+                                <div class="app-subtitle">Mapa do jogo, rota e zoom no celular</div>
+                            </div>
+                        </div>
+                        <div class="live-screen-pill">GPS</div>
+                    </header>
+                    <div class="utility-shell">
+                        <section class="utility-hero">
+                            <span class="utility-eyebrow">Rota ativa</span>
+                            <strong>Centro de Los Santos ate a loja premium</strong>
+                            <p>O mapa so aparece dentro do celular, com atalhos de rota e controle de zoom no proprio app.</p>
+                        </section>
+                        <section class="map-chip-row">
+                            <button class="map-chip" type="button" data-map-route="Casa"><span>Destino</span><strong>Casa</strong></button>
+                            <button class="map-chip" type="button" data-map-route="Trampo"><span>Destino</span><strong>Trampo</strong></button>
+                            <button class="map-chip" type="button" data-map-route="Loja"><span>Destino</span><strong>Loja</strong></button>
+                        </section>
+                        <div class="map-live-canvas" id="phoneMapCanvas"></div>
+                        <div class="map-live-actions">
+                            <button class="live-card-button" type="button" data-map-zoom="in">Zoom +</button>
+                            <button class="live-card-button" type="button" data-map-zoom="out">Zoom -</button>
+                            <button class="live-card-button" type="button" data-command="/gps">Enviar rota</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    function renderMusicHome() {
+        return `
+            <section
+                class="app-window utility-window"
+                style="--utility-accent:#ff5878;--utility-accent-deep:#8e1036;--utility-bg:#15070f;--utility-bg-deep:#060204;"
+            >
+                <div class="app-body">
+                    <header class="app-topbar utility-topbar">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="utility-pulse" style="background:radial-gradient(circle at 35% 30%, rgba(255,255,255,0.4), transparent 36%), #ff5878;"></span>
+                            <div>
+                                <div class="app-title">Music</div>
+                                <div class="app-subtitle">Radio do veiculo com audio espacial</div>
+                            </div>
+                        </div>
+                        <div class="live-screen-pill">Audio</div>
+                    </header>
+                    <div class="utility-shell">
+                        <section class="utility-hero">
+                            <span class="utility-eyebrow">Now playing</span>
+                            <strong>Night Drive FM</strong>
+                            <p>O audio sai do proprio app com alternancia de sala, grave mais forte e medidor ao vivo.</p>
+                        </section>
+                        <div class="audio-meter"><div class="audio-meter-fill" id="audioMeterFill"></div></div>
+                        <div class="audio-row">
+                            <strong>Sala ativa</strong>
+                            <span id="audioRoomLabel">Club | foco central no painel</span>
+                        </div>
+                        <section class="music-station-grid">
+                            <article class="music-station">
+                                <strong>Night Drive FM</strong>
+                                <span>Synth lento, grave forte e painel fechado.</span>
+                            </article>
+                            <article class="music-station">
+                                <strong>Garage Bass</strong>
+                                <span>Mais eco, menos brilho e ambiencia de garagem.</span>
+                            </article>
+                        </section>
+                        <div class="map-live-actions">
+                            <button class="live-card-button" type="button" data-audio-toggle="true">Play / Pause</button>
+                            <button class="live-card-button" type="button" data-audio-room="club">Club</button>
+                            <button class="live-card-button" type="button" data-audio-room="garage">Garage</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    function renderCalculator() {
+        return `
+            <section class="app-window calc-window">
+                <div class="app-body">
+                    <header class="app-topbar utility-topbar">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="utility-pulse" style="background:radial-gradient(circle at 35% 30%, rgba(255,255,255,0.4), transparent 36%), #f59e0b;"></span>
+                            <div>
+                                <div class="app-title">Calculator</div>
+                                <div class="app-subtitle">Operacoes rapidas dentro do celular</div>
+                            </div>
+                        </div>
+                        <div class="live-screen-pill">Calc</div>
+                    </header>
+                    <div class="calc-shell">
+                        <section class="calc-display">
+                            <small>Resultado</small>
+                            <strong id="calcDisplay">${state.calcDisplay}</strong>
+                        </section>
+                        <section class="calc-keypad">
+                            <button class="calc-key function" type="button" data-calc-key="clear">AC</button>
+                            <button class="calc-key function" type="button" data-calc-key="delete">DEL</button>
+                            <button class="calc-key operator" type="button" data-calc-key="/">/</button>
+                            <button class="calc-key operator" type="button" data-calc-key="*">x</button>
+                            <button class="calc-key" type="button" data-calc-key="7">7</button>
+                            <button class="calc-key" type="button" data-calc-key="8">8</button>
+                            <button class="calc-key" type="button" data-calc-key="9">9</button>
+                            <button class="calc-key operator" type="button" data-calc-key="-">-</button>
+                            <button class="calc-key" type="button" data-calc-key="4">4</button>
+                            <button class="calc-key" type="button" data-calc-key="5">5</button>
+                            <button class="calc-key" type="button" data-calc-key="6">6</button>
+                            <button class="calc-key operator" type="button" data-calc-key="+">+</button>
+                            <button class="calc-key" type="button" data-calc-key="1">1</button>
+                            <button class="calc-key" type="button" data-calc-key="2">2</button>
+                            <button class="calc-key" type="button" data-calc-key="3">3</button>
+                            <button class="calc-key operator" type="button" data-calc-key="equals">=</button>
+                            <button class="calc-key" type="button" data-calc-key="0">0</button>
+                            <button class="calc-key" type="button" data-calc-key="00">00</button>
+                            <button class="calc-key" type="button" data-calc-key=".">.</button>
+                            <button class="calc-key function" type="button" data-open-inventory="true">INV</button>
+                        </section>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    function mountRouteMap() {
+        const canvasHost = document.getElementById("phoneMapCanvas");
+        if (!canvasHost) {
+            if (phoneMapController) {
+                phoneMapController.destroy();
+                phoneMapController = null;
+            }
+            return;
+        }
+
+        phoneMapController = window.XyronExperiences.createRouteMap(canvasHost, {
+            runtime,
+            auto: !runtimeLowRamMode,
+            zoom: state.mapZoom,
+            progress: 0.22
+        });
+    }
+
+    function mountAudioStudio(autoplay) {
+        const meter = document.getElementById("audioMeterFill");
+        const roomLabel = document.getElementById("audioRoomLabel");
+        if (!meter || !roomLabel) {
+            if (audioMeterTimer) {
+                window.clearInterval(audioMeterTimer);
+                audioMeterTimer = null;
+            }
+            return;
+        }
+
+        if (!phoneAudioStudio) {
+            phoneAudioStudio = window.XyronExperiences.createSpatialStudio({});
+            phoneAudioStudio.setRoomPreset("club");
+        }
+
+        if (autoplay && phoneAudioStudio.resume) {
+            phoneAudioStudio.resume();
+        }
+        if (autoplay && phoneAudioStudio.setPlaying) {
+            phoneAudioStudio.setPlaying(true);
+        }
+
+        if (audioMeterTimer) {
+            window.clearInterval(audioMeterTimer);
+        }
+
+        audioMeterTimer = window.setInterval(() => {
+            if (!phoneAudioStudio) {
+                return;
+            }
+            const level = phoneAudioStudio.getMeterLevel();
+            meter.style.width = `${Math.max(12, Math.round(level * 100))}%`;
+            const room = phoneAudioStudio.getRoomName ? phoneAudioStudio.getRoomName() : "Club";
+            roomLabel.textContent = phoneAudioStudio.isPlaying()
+                ? `${room} | fonte ativa no painel`
+                : `${room} | em espera`;
+        }, runtimeLowRamMode ? 260 : 180);
+    }
+
+    function teardownRuntimeExperiences(nextScreen) {
+        if (nextScreen !== "maps-home" && phoneMapController) {
+            phoneMapController.destroy();
+            phoneMapController = null;
+        }
+        if (nextScreen !== "music-home" && audioMeterTimer) {
+            window.clearInterval(audioMeterTimer);
+            audioMeterTimer = null;
+        }
+        if (nextScreen !== "music-home" && phoneAudioStudio && phoneAudioStudio.setPlaying) {
+            musicShouldResume = false;
+            phoneAudioStudio.setPlaying(false);
+        }
+    }
+
+    function formatCalculatorValue(value) {
+        if (!Number.isFinite(value)) {
+            return "Erro";
+        }
+        if (Math.abs(value) >= 1e9 || (Math.abs(value) > 0 && Math.abs(value) < 1e-6)) {
+            return value.toExponential(4);
+        }
+        return String(Number(value.toFixed(6)));
+    }
+
+    function readCalculatorNumber() {
+        const parsed = Number(state.calcDisplay);
+        return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function applyCalculatorOperation(left, right, operator) {
+        if (operator === "+") {
+            return left + right;
+        }
+        if (operator === "-") {
+            return left - right;
+        }
+        if (operator === "*") {
+            return left * right;
+        }
+        if (operator === "/") {
+            return right === 0 ? Number.NaN : left / right;
+        }
+        return right;
+    }
+
+    function handleCalculatorInput(key) {
+        if (state.calcDisplay === "Erro" && key !== "clear") {
+            state.calcDisplay = "0";
+            state.calcStoredValue = null;
+            state.calcOperator = null;
+            state.calcReplaceDisplay = false;
+        }
+
+        if (key === "clear") {
+            state.calcDisplay = "0";
+            state.calcStoredValue = null;
+            state.calcOperator = null;
+            state.calcReplaceDisplay = false;
+            renderCurrentScreen();
+            return;
+        }
+
+        if (key === "delete") {
+            if (state.calcReplaceDisplay) {
+                state.calcDisplay = "0";
+                state.calcReplaceDisplay = false;
+            } else {
+                state.calcDisplay = state.calcDisplay.length > 1 ? state.calcDisplay.slice(0, -1) : "0";
+            }
+            renderCurrentScreen();
+            return;
+        }
+
+        if (["+", "-", "*", "/"].includes(key)) {
+            const currentValue = readCalculatorNumber();
+            if (state.calcStoredValue !== null && state.calcOperator && !state.calcReplaceDisplay) {
+                const result = applyCalculatorOperation(state.calcStoredValue, currentValue, state.calcOperator);
+                state.calcDisplay = formatCalculatorValue(result);
+                state.calcStoredValue = Number.isFinite(result) ? result : null;
+            } else {
+                state.calcStoredValue = currentValue;
+            }
+            state.calcOperator = key;
+            state.calcReplaceDisplay = true;
+            renderCurrentScreen();
+            return;
+        }
+
+        if (key === "equals") {
+            if (state.calcOperator && state.calcStoredValue !== null) {
+                const result = applyCalculatorOperation(state.calcStoredValue, readCalculatorNumber(), state.calcOperator);
+                state.calcDisplay = formatCalculatorValue(result);
+                state.calcStoredValue = null;
+                state.calcOperator = null;
+                state.calcReplaceDisplay = true;
+                renderCurrentScreen();
+            }
+            return;
+        }
+
+        if (key === ".") {
+            if (state.calcReplaceDisplay) {
+                state.calcDisplay = "0.";
+                state.calcReplaceDisplay = false;
+            } else if (!state.calcDisplay.includes(".")) {
+                state.calcDisplay += ".";
+            }
+            renderCurrentScreen();
+            return;
+        }
+
+        if (/^\d+$/.test(key)) {
+            if (state.calcReplaceDisplay || state.calcDisplay === "0") {
+                state.calcDisplay = key;
+            } else {
+                state.calcDisplay += key;
+            }
+            state.calcReplaceDisplay = false;
+            renderCurrentScreen();
+        }
+    }
+
+    function renderCurrentScreen(force = false) {
+        const screen = currentScreen();
+        const appViewport = document.getElementById("appViewport");
+        const homeShell = document.getElementById("homeShell");
+        teardownRuntimeExperiences(screen);
+
+        if (screen === "home") {
+            homeShell.classList.remove("hidden");
+            appViewport.classList.add("hidden");
+            if (force || appViewport.innerHTML) {
+                appViewport.innerHTML = "";
+            }
+            return;
+        }
+
+        homeShell.classList.add("hidden");
+        appViewport.classList.remove("hidden");
+
+        if (screen === "whatsapp-list") {
+            appViewport.innerHTML = renderWhatsAppList();
+            return;
+        }
+        if (screen === "whatsapp-chat") {
+            appViewport.innerHTML = renderWhatsAppChat();
+            return;
+        }
+        if (screen === "instagram-feed") {
+            appViewport.innerHTML = renderInstagram();
+            return;
+        }
+        if (screen === "bank-home") {
+            appViewport.innerHTML = renderNubank();
+            return;
+        }
+        if (screen === "maps-home") {
+            appViewport.innerHTML = renderMapsHome();
+            mountRouteMap();
+            return;
+        }
+        if (screen === "music-home") {
+            appViewport.innerHTML = renderMusicHome();
+            mountAudioStudio(true);
+            return;
+        }
+        if (screen === "calc-home") {
+            appViewport.innerHTML = renderCalculator();
+            return;
+        }
+        if (utilityApps[topLevelScreens[screen]]) {
+            appViewport.innerHTML = renderUtilityApp(topLevelScreens[screen]);
+            return;
+        }
+
+        appViewport.innerHTML = "";
+    }
+
+    function renderRecents(force = false) {
+        const overlay = document.getElementById("recentsOverlay");
+        const nextKey = state.recentsVisible
+            ? `1:${state.recentApps.join("|")}`
+            : "0";
+        if (!force && recentsCacheKey === nextKey) {
+            return;
+        }
+        recentsCacheKey = nextKey;
+        if (!state.recentsVisible) {
+            overlay.classList.add("hidden");
+            overlay.innerHTML = "";
+            return;
+        }
+
+        overlay.classList.remove("hidden");
+        overlay.innerHTML = `
+            <div class="recents-title">Apps recentes</div>
+            ${state.recentApps.length ? state.recentApps.map((appKey) => `
+                <button class="recent-card" type="button" data-recent-app="${appKey}">
+                    <span class="recent-chip">${recentMeta[appKey].label}</span>
+                    <strong>${recentMeta[appKey].label}</strong>
+                    <p>${recentMeta[appKey].preview}</p>
+                </button>
+            `).join("") : `<div class="recents-empty">Abra alguns apps para popular os recentes do celular.</div>`}
+        `;
+    }
+
+    function render() {
+        renderCurrentScreen();
+        renderRecents();
+        syncRuntimeHud();
+        refreshClock();
+    }
+
+    function syncRuntimeHud(force = false) {
+        const status = document.getElementById("runtimeStatus");
+        const copy = document.getElementById("runtimeCopy");
+        const nextKey = `${currentScreen()}|${runtime.state.wsConnected ? "1" : "0"}|${state.liveAnnouncement}`;
+        if (!force && runtimeHudCacheKey === nextKey) {
+            return;
+        }
+        runtimeHudCacheKey = nextKey;
+        document.body.classList.toggle("compact-runtime", currentScreen() !== "home");
+        if (status) {
+            status.textContent = runtime.state.wsConnected ? "Live Sync" : "Live Off";
+        }
+        if (copy) {
+            copy.textContent = state.liveAnnouncement;
+        }
+    }
+
+    function refreshClock(force = false) {
+        const clockLabel = document.getElementById("clockLabel");
+        if (!clockLabel) {
+            return;
+        }
+        if (isPreview) {
+            if (force || lastClockValue !== "01:27") {
+                lastClockValue = "01:27";
+                clockLabel.textContent = "01:27";
+            }
+            return;
+        }
+        const now = new Date();
+        const value = now.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+        if (!force && lastClockValue === value) {
+            return;
+        }
+        lastClockValue = value;
+        clockLabel.textContent = value;
+    }
+
+    function applyStageScale() {
+        if (isPreview) {
+            document.documentElement.style.setProperty("--stage-scale", "1");
+            return 1;
+        }
+
+        const scale = Math.min(
+            window.innerWidth / stageBase.width,
+            window.innerHeight / stageBase.height
+        );
+        const safeScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
+        document.documentElement.style.setProperty("--stage-scale", safeScale.toFixed(4));
+        return safeScale;
+    }
+
+    function handleOverlayVisibilityChange(visible) {
+        overlayVisible = !!visible;
+        if (!overlayVisible) {
+            if (phoneMapController && phoneMapController.pause) {
+                phoneMapController.pause();
+            }
+            if (audioMeterTimer) {
+                window.clearInterval(audioMeterTimer);
+                audioMeterTimer = null;
+            }
+            if (phoneAudioStudio) {
+                musicShouldResume = phoneAudioStudio.isPlaying ? phoneAudioStudio.isPlaying() : false;
+                if (phoneAudioStudio.setPlaying) {
+                    phoneAudioStudio.setPlaying(false);
+                }
+            }
+            return;
+        }
+
+        if (currentScreen() === "maps-home" && phoneMapController && phoneMapController.resume) {
+            phoneMapController.resume();
+        }
+        if (currentScreen() === "music-home" && phoneAudioStudio) {
+            if (musicShouldResume && phoneAudioStudio.resume) {
+                phoneAudioStudio.resume();
+            }
+            if (musicShouldResume && phoneAudioStudio.setPlaying) {
+                phoneAudioStudio.setPlaying(true);
+            }
+            mountAudioStudio(false);
+        }
+        syncRuntimeHud(true);
+    }
+
+    function logRuntimeMetrics(source) {
+        const scale = applyStageScale();
+        const stage = document.querySelector(".stage");
+        const rect = stage ? stage.getBoundingClientRect() : { width: 0, height: 0 };
+        console.log(
+            `[PhoneUI] ${source} preview=${isPreview} window=${Math.round(window.innerWidth)}x${Math.round(window.innerHeight)} stage=${Math.round(rect.width)}x${Math.round(rect.height)} scale=${scale.toFixed(3)} dpr=${window.devicePixelRatio}`
+        );
+    }
+
+    async function enablePreviewHotReload() {
+        if (!isPreview || typeof fetch !== "function") {
+            return;
+        }
+
+        let baselineStamp = null;
+        let checking = false;
+
+        async function readStamp() {
+            const response = await fetch(window.location.href, {
+                method: "HEAD",
+                cache: "no-store"
+            });
+            return response.headers.get("last-modified") || response.headers.get("etag");
+        }
+
+        try {
+            baselineStamp = await readStamp();
+        } catch (error) {
+            return;
+        }
+
+        setInterval(async () => {
+            if (checking || document.hidden) {
+                return;
+            }
+
+            checking = true;
+            try {
+                const nextStamp = await readStamp();
+                if (baselineStamp && nextStamp && baselineStamp !== nextStamp) {
+                    window.location.reload();
+                    return;
+                }
+                if (nextStamp) {
+                    baselineStamp = nextStamp;
+                }
+            } catch (error) {
+                // Ignore preview polling failures.
+            } finally {
+                checking = false;
+            }
+        }, 900);
+    }
+
+    document.addEventListener("click", (event) => {
+        const navButton = event.target.closest("[data-nav]");
+        if (navButton) {
+            const nav = navButton.dataset.nav;
+            if (nav === "back") {
+                goBack();
+            } else if (nav === "home") {
+                goHome();
+            } else if (nav === "recent") {
+                toggleRecents();
+            }
+            return;
+        }
+
+        const appButton = event.target.closest("[data-app-key]");
+        if (appButton) {
+            const config = [...homeApps, singleApp].find((app) => app.key === appButton.dataset.appKey);
+            if (config) {
+                activateApp(config);
+            }
+            return;
+        }
+
+        const chatButton = event.target.closest("[data-chat-id]");
+        if (chatButton) {
+            state.activeChatId = chatButton.dataset.chatId;
+            openScreen("whatsapp-chat");
+            return;
+        }
+
+        const quickReply = event.target.closest("[data-quick-reply]");
+        if (quickReply) {
+            const input = document.getElementById("waDraft");
+            if (input) {
+                input.value = quickReply.dataset.quickReply;
+                input.focus();
+            }
+            return;
+        }
+
+        const recentCard = event.target.closest("[data-recent-app]");
+        if (recentCard) {
+            const targetApp = recentCard.dataset.recentApp;
+            const entryScreen = topLevelEntryScreen[targetApp];
+            if (entryScreen) {
+                state.history = ["home", entryScreen];
+                state.recentsVisible = false;
+                rememberRecent(entryScreen);
+                render();
+            }
+            return;
+        }
+
+        const voiceButton = event.target.closest("#voiceFab");
+        if (voiceButton) {
+            runtime.startVoiceCommand("phone");
+            if (isPreview) {
+                showPreviewToast("Fale: ligar motor, abrir inventario, Maps, Music ou Nubank");
+            }
+            return;
+        }
+
+        const openScreenButton = event.target.closest("[data-open-screen]");
+        if (openScreenButton) {
+            openScreen(openScreenButton.dataset.openScreen);
+            return;
+        }
+
+        const openInventoryButton = event.target.closest("[data-open-inventory]");
+        if (openInventoryButton) {
+            openInventory();
+            return;
+        }
+
+        const calculatorButton = event.target.closest("[data-calc-key]");
+        if (calculatorButton) {
+            handleCalculatorInput(calculatorButton.dataset.calcKey);
+            return;
+        }
+
+        const mapRouteButton = event.target.closest("[data-map-route]");
+        if (mapRouteButton) {
+            dispatchCommand("/gps", `Rota para ${mapRouteButton.dataset.mapRoute}`);
+            return;
+        }
+
+        const mapZoomButton = event.target.closest("[data-map-zoom]");
+        if (mapZoomButton && phoneMapController) {
+            const delta = mapZoomButton.dataset.mapZoom === "in" ? 0.12 : -0.12;
+            state.mapZoom = Math.max(0.75, Math.min(1.9, state.mapZoom + delta));
+            phoneMapController.update({ zoom: state.mapZoom });
+            return;
+        }
+
+        const audioToggle = event.target.closest("[data-audio-toggle]");
+        if (audioToggle) {
+            if (!phoneAudioStudio) {
+                phoneAudioStudio = window.XyronExperiences.createSpatialStudio({});
+            }
+            if (phoneAudioStudio.resume) {
+                phoneAudioStudio.resume();
+            }
+            const playing = phoneAudioStudio.toggle();
+            showPreviewToast(playing ? "Music ligado" : "Music pausado");
+            return;
+        }
+
+        const audioRoom = event.target.closest("[data-audio-room]");
+        if (audioRoom) {
+            if (!phoneAudioStudio) {
+                phoneAudioStudio = window.XyronExperiences.createSpatialStudio({});
+            }
+            phoneAudioStudio.setRoomPreset(audioRoom.dataset.audioRoom);
+            const label = document.getElementById("audioRoomLabel");
+            if (label) {
+                const roomName = phoneAudioStudio.getRoomName ? phoneAudioStudio.getRoomName() : audioRoom.dataset.audioRoom;
+                label.textContent = `${roomName} | ambiente atualizado`;
+            }
+            return;
+        }
+
+        const liveTheme = event.target.closest("[data-live-theme]");
+        if (liveTheme) {
+            if (liveTheme.dataset.liveTheme === "amber") {
+                document.documentElement.style.setProperty("--screen-bg", "radial-gradient(circle at 50% 18%, rgba(201, 132, 44, 0.18), transparent 28%), linear-gradient(180deg, #0b0c10 0%, #050608 100%)");
+            } else {
+                document.documentElement.style.setProperty("--screen-bg", "radial-gradient(circle at 50% 18%, rgba(60, 89, 148, 0.16), transparent 28%), linear-gradient(180deg, #0b0c10 0%, #050608 100%)");
+            }
+            showPreviewToast("Tema aplicado");
+            return;
+        }
+
+        const liveAnnounce = event.target.closest("[data-live-announce]");
+        if (liveAnnounce) {
+            state.liveAnnouncement = "Anuncio global enviado pela malha live";
+            const copy = document.getElementById("opsStatusCopy");
+            if (copy) {
+                copy.textContent = state.liveAnnouncement;
+            }
+            showPreviewToast("Anuncio disparado");
+            return;
+        }
+
+        const commandButton = event.target.closest("[data-command]");
+        if (commandButton) {
+            dispatchCommand(commandButton.dataset.command, "Acao disparada");
+            return;
+        }
+
+        const likeButton = event.target.closest("[data-like-post]");
+        if (likeButton) {
+            const postId = likeButton.dataset.likePost;
+            if (state.likedPosts.has(postId)) {
+                state.likedPosts.delete(postId);
+            } else {
+                state.likedPosts.add(postId);
+            }
+            renderCurrentScreen();
+            renderRecents();
+            return;
+        }
+
+        const bankTabButton = event.target.closest("[data-bank-tab]");
+        if (bankTabButton) {
+            state.bankTab = bankTabButton.dataset.bankTab;
+            renderCurrentScreen();
+            return;
+        }
+
+        const bankToggle = event.target.closest("[data-bank-toggle]");
+        if (bankToggle) {
+            state.bankBalanceVisible = !state.bankBalanceVisible;
+            renderCurrentScreen();
+        }
+    });
+
+    document.addEventListener("submit", (event) => {
+        const form = event.target.closest("[data-chat-form]");
+        if (!form) {
+            return;
+        }
+
+        event.preventDefault();
+        const input = form.querySelector("input");
+        if (!input) {
+            return;
+        }
+
+        const value = input.value.trim();
+        if (!value) {
+            return;
+        }
+
+        const list = whatsappMessages[state.activeChatId] || [];
+        list.push({ from: "me", text: value, time: "agora" });
+        whatsappMessages[state.activeChatId] = list;
+        input.value = "";
+        renderCurrentScreen();
+    });
+
+    window.XyronHydrate = () => {
+        overlayVisible = document.documentElement.dataset.xyronVisible !== "0";
+        refreshClock(true);
+        syncRuntimeHud(true);
+        requestAnimationFrame(() => logRuntimeMetrics("hydrate"));
+    };
+
+    window.addEventListener("resize", () => {
+        applyStageScale();
+        if (!isPreview) {
+            requestAnimationFrame(() => logRuntimeMetrics("resize"));
+        }
+    });
+
+    window.addEventListener("xyron:live-status", (event) => {
+        const connected = !!(event.detail && event.detail.connected);
+        state.liveAnnouncement = connected
+            ? "WebSocket conectado: anuncios e temas em tempo real"
+            : "Hot-reload em espera. Fallback por polling ativo.";
+        syncRuntimeHud();
+        const ops = document.getElementById("opsStatusCopy");
+        if (ops) {
+            ops.textContent = state.liveAnnouncement;
+        }
+    });
+
+    window.addEventListener("xyron:announcement", (event) => {
+        const message = (event.detail && event.detail.message) || "Atualizacao live recebida";
+        state.liveAnnouncement = message;
+        syncRuntimeHud();
+        showPreviewToast(message);
+        const ops = document.getElementById("opsStatusCopy");
+        if (ops) {
+            ops.textContent = message;
+        }
+    });
+
+    window.addEventListener("xyron:voice-result", (event) => {
+        const detail = event.detail || {};
+        const intent = detail.intent || {};
+        const transcript = detail.transcript || "";
+        if (intent.kind === "screen" && intent.value) {
+            openScreen(intent.value);
+        }
+        if (intent.kind === "inventory") {
+            openInventory();
+        }
+        if (transcript) {
+            showPreviewToast(`Voz: ${transcript}`);
+        }
+    });
+
+    window.addEventListener("xyron:voice-error", () => {
+        showPreviewToast("Voz indisponivel agora");
+    });
+
+    window.XyronOverlayVisibilityChanged = handleOverlayVisibilityChange;
+    renderHome();
+    render();
+    applyStageScale();
+    handleOverlayVisibilityChange(document.documentElement.dataset.xyronVisible !== "0");
+    enablePreviewHotReload();
+    setInterval(refreshClock, 30000);
+    requestAnimationFrame(() => logRuntimeMetrics("boot"));
+</script>
+</body>
+</html>

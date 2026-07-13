@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>News RP - Roleta de Armas</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: transparent;
+            color: #ffffff;
+            font-family: Arial, Helvetica, sans-serif;
+            user-select: none;
+            touch-action: none;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(circle at center, rgba(255, 255, 255, 0.08) 0, transparent 34%),
+                rgba(4, 8, 14, 0.76);
+            backdrop-filter: blur(4px);
+        }
+
+        .title {
+            position: fixed;
+            top: 26px;
+            left: 28px;
+            padding: 8px 12px;
+            border-left: 3px solid #f59e0b;
+            background: rgba(0, 0, 0, 0.38);
+            color: #f2d6a3;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .close {
+            position: fixed;
+            top: 24px;
+            right: 28px;
+            width: 38px;
+            height: 38px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.42);
+            color: #ffffff;
+            font-size: 24px;
+            line-height: 34px;
+            text-align: center;
+        }
+
+        .wheel-wrap {
+            position: relative;
+            width: min(72vmin, 500px);
+            height: min(72vmin, 500px);
+        }
+
+        svg,
+        .items {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .segment {
+            fill: rgba(255, 255, 255, 0.035);
+            stroke: rgba(255, 255, 255, 0.12);
+            stroke-width: 1;
+            transition: fill 120ms ease, stroke 120ms ease;
+        }
+
+        .segment.active {
+            fill: rgba(245, 158, 11, 0.24);
+            stroke: rgba(245, 158, 11, 0.92);
+        }
+
+        .center-dot {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 12px;
+            height: 12px;
+            margin-left: -6px;
+            margin-top: -6px;
+            border-radius: 999px;
+            background: #f59e0b;
+            box-shadow: 0 0 18px rgba(245, 158, 11, 0.85);
+        }
+
+        .weapon {
+            position: absolute;
+            width: 74px;
+            height: 74px;
+            margin-left: -37px;
+            margin-top: -37px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transform: scale(0.86);
+            opacity: 0.72;
+            transition: transform 120ms ease, opacity 120ms ease, filter 120ms ease;
+        }
+
+        .weapon.active {
+            transform: scale(1.08);
+            opacity: 1;
+            filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.72));
+        }
+
+        .weapon img {
+            max-width: 62px;
+            max-height: 62px;
+            object-fit: contain;
+        }
+
+        .weapon .fallback {
+            width: 46px;
+            height: 46px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 50%;
+            color: #f2d6a3;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .info {
+            position: fixed;
+            left: 50%;
+            bottom: 26px;
+            min-width: 220px;
+            transform: translateX(-50%);
+            padding: 10px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.48);
+            text-align: center;
+        }
+
+        .name {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+        }
+
+        .ammo {
+            margin-top: 3px;
+            color: #f2d6a3;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 720px) {
+            .title {
+                top: 14px;
+                left: 14px;
+                font-size: 9px;
+            }
+
+            .close {
+                top: 12px;
+                right: 14px;
+            }
+
+            .info {
+                bottom: 14px;
+                padding: 8px 12px;
+            }
+
+            .weapon {
+                width: 60px;
+                height: 60px;
+                margin-left: -30px;
+                margin-top: -30px;
+            }
+
+            .weapon img {
+                max-width: 50px;
+                max-height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="overlay" id="overlay">
+        <div class="title">Roleta de armas</div>
+        <button class="close" id="close" type="button" aria-label="Fechar">x</button>
+
+        <section class="wheel-wrap" id="wheel-wrap">
+            <svg id="wheel-svg" viewBox="0 0 500 500" aria-hidden="true"></svg>
+            <div class="items" id="items"></div>
+            <div class="center-dot"></div>
+        </section>
+
+        <aside class="info">
+            <div class="name" id="weapon-name">Punho</div>
+            <div class="ammo" id="weapon-ammo">Sem municao</div>
+        </aside>
+    </main>
+
+    <script>
+        const WEAPON_NAMES = {
+            0: "Punho",
+            1: "Soco ingles",
+            2: "Taco de golf",
+            3: "Cassetete",
+            4: "Faca",
+            5: "Taco",
+            6: "Pa",
+            7: "Taco de sinuca",
+            8: "Katana",
+            9: "Motosserra",
+            10: "Dildo",
+            11: "Dildo 2",
+            12: "Vibrador",
+            13: "Vibrador 2",
+            14: "Flores",
+            15: "Bengala",
+            16: "Granada",
+            17: "Gas lacrimogeneo",
+            18: "Molotov",
+            22: "Colt 45",
+            23: "Pistola silenciada",
+            24: "Desert Eagle",
+            25: "Shotgun",
+            26: "Sawnoff",
+            27: "Combat Shotgun",
+            28: "Uzi",
+            29: "MP5",
+            30: "AK-47",
+            31: "M4",
+            32: "Tec-9",
+            33: "Rifle",
+            34: "Sniper",
+            35: "RPG",
+            36: "Heat Seeker",
+            37: "Lanca-chamas",
+            38: "Minigun",
+            39: "Satchel",
+            40: "Detonador",
+            41: "Spray",
+            42: "Extintor",
+            43: "Camera",
+            44: "Visao noturna",
+            45: "Visao termica",
+            46: "Paraquedas"
+        };
+
+        const MELEE_WEAPONS = new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+        const wheelSvg = document.getElementById("wheel-svg");
+        const items = document.getElementById("items");
+        const wheelWrap = document.getElementById("wheel-wrap");
+        const weaponName = document.getElementById("weapon-name");
+        const weaponAmmo = document.getElementById("weapon-ammo");
+        const closeButton = document.getElementById("close");
+
+        let weapons = [{ id: 0, ammo: 0, current: true }];
+        let activeIndex = 0;
+
+        function normalizeWeapon(raw) {
+            const id = Number(raw && raw.id);
+            const ammo = Number(raw && raw.ammo);
+            if (!Number.isFinite(id) || id < 0 || id > 46) {
+                return null;
+            }
+            return {
+                id: Math.floor(id),
+                ammo: Number.isFinite(ammo) ? Math.max(0, Math.floor(ammo)) : 0,
+                current: !!(raw && raw.current)
+            };
+        }
+
+        function normalizeInventory(payload) {
+            let parsed = payload;
+            if (typeof payload === "string") {
+                try {
+                    parsed = JSON.parse(payload);
+                } catch (error) {
+                    parsed = [];
+                }
+            }
+
+            const list = Array.isArray(parsed)
+                ? parsed.map(normalizeWeapon).filter(Boolean)
+                : [];
+
+            const unique = [];
+            const seen = new Set();
+            list.forEach((weapon) => {
+                if (seen.has(weapon.id)) {
+                    return;
+                }
+                seen.add(weapon.id);
+                unique.push(weapon);
+            });
+
+            if (unique.length === 0) {
+                unique.push({ id: 0, ammo: 0, current: true });
+            }
+
+            if (!unique.some((weapon) => weapon.id === 0)) {
+                unique.unshift({ id: 0, ammo: 0, current: false });
+            }
+
+            return unique;
+        }
+
+        function polar(cx, cy, radius, angle) {
+            const radians = (angle - 90) * Math.PI / 180;
+            return {
+                x: cx + radius * Math.cos(radians),
+                y: cy + radius * Math.sin(radians)
+            };
+        }
+
+        function segmentPath(cx, cy, innerRadius, outerRadius, startAngle, endAngle) {
+            if (Math.abs(endAngle - startAngle) >= 359.9) {
+                endAngle = startAngle + 359.9;
+            }
+
+            const start = polar(cx, cy, outerRadius, endAngle);
+            const end = polar(cx, cy, outerRadius, startAngle);
+            const startInner = polar(cx, cy, innerRadius, endAngle);
+            const endInner = polar(cx, cy, innerRadius, startAngle);
+            const largeArc = endAngle - startAngle <= 180 ? "0" : "1";
+
+            return [
+                "M", start.x, start.y,
+                "A", outerRadius, outerRadius, 0, largeArc, 0, end.x, end.y,
+                "L", endInner.x, endInner.y,
+                "A", innerRadius, innerRadius, 0, largeArc, 1, startInner.x, startInner.y,
+                "Z"
+            ].join(" ");
+        }
+
+        function weaponLabel(id) {
+            return WEAPON_NAMES[id] || `Arma ${id}`;
+        }
+
+        function weaponImage(id) {
+            return `images/weapon_${id}.webp`;
+        }
+
+        function setActive(index) {
+            if (weapons.length === 0) {
+                activeIndex = 0;
+                return;
+            }
+            activeIndex = Math.max(0, Math.min(index, weapons.length - 1));
+
+            document.querySelectorAll(".segment").forEach((node, i) => {
+                node.classList.toggle("active", i === activeIndex);
+            });
+            document.querySelectorAll(".weapon").forEach((node, i) => {
+                node.classList.toggle("active", i === activeIndex);
+            });
+
+            const weapon = weapons[activeIndex] || weapons[0];
+            weaponName.textContent = weaponLabel(weapon.id);
+            weaponAmmo.textContent = MELEE_WEAPONS.has(weapon.id)
+                ? "Corpo a corpo"
+                : `${weapon.ammo} municoes`;
+        }
+
+        function render() {
+            wheelSvg.innerHTML = "";
+            items.innerHTML = "";
+
+            const total = Math.max(weapons.length, 1);
+            const slice = 360 / total;
+            const gap = total > 1 ? 2 : 0;
+            const currentIndex = weapons.findIndex((weapon) => weapon.current);
+            activeIndex = currentIndex >= 0 ? currentIndex : 0;
+
+            weapons.forEach((weapon, index) => {
+                const angle = index * slice;
+                const start = angle - slice / 2 + gap / 2;
+                const end = angle + slice / 2 - gap / 2;
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("class", "segment");
+                path.setAttribute("data-index", String(index));
+                path.setAttribute("d", segmentPath(250, 250, 48, 240, start, end));
+                wheelSvg.appendChild(path);
+
+                const pos = polar(250, 250, total === 1 ? 130 : 146, angle);
+                const item = document.createElement("button");
+                item.type = "button";
+                item.className = "weapon";
+                item.style.left = `${pos.x / 500 * 100}%`;
+                item.style.top = `${pos.y / 500 * 100}%`;
+                item.dataset.index = String(index);
+
+                const img = document.createElement("img");
+                img.src = weaponImage(weapon.id);
+                img.alt = weaponLabel(weapon.id);
+                img.onerror = () => {
+                    img.style.display = "none";
+                    fallback.style.display = "flex";
+                };
+
+                const fallback = document.createElement("span");
+                fallback.className = "fallback";
+                fallback.textContent = String(weapon.id);
+
+                item.appendChild(img);
+                item.appendChild(fallback);
+                items.appendChild(item);
+            });
+
+            setActive(activeIndex);
+        }
+
+        function indexFromPoint(clientX, clientY) {
+            const rect = wheelWrap.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const dx = clientX - cx;
+            const dy = clientY - cy;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < rect.width * 0.08) {
+                return activeIndex;
+            }
+
+            let angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+            if (angle < 0) {
+                angle += 360;
+            }
+
+            const slice = 360 / Math.max(weapons.length, 1);
+            return Math.floor((angle + slice / 2) / slice) % weapons.length;
+        }
+
+        function selectActive() {
+            const weapon = weapons[activeIndex] || weapons[0];
+            if (window.Android && typeof window.Android.selectWeapon === "function") {
+                window.Android.selectWeapon(weapon.id);
+            }
+        }
+
+        function closeWheel() {
+            if (window.Android && typeof window.Android.closeWeaponWheel === "function") {
+                window.Android.closeWeaponWheel();
+            }
+        }
+
+        wheelWrap.addEventListener("pointermove", (event) => {
+            if (!weapons.length) {
+                return;
+            }
+            setActive(indexFromPoint(event.clientX, event.clientY));
+        });
+
+        wheelWrap.addEventListener("pointerup", (event) => {
+            event.preventDefault();
+            if (!weapons.length) {
+                closeWheel();
+                return;
+            }
+            setActive(indexFromPoint(event.clientX, event.clientY));
+            selectActive();
+        });
+
+        closeButton.addEventListener("pointerup", (event) => {
+            event.preventDefault();
+            closeWheel();
+        });
+
+        window.NewsRpWeaponWheelSetInventory = function (payload) {
+            weapons = normalizeInventory(payload);
+            render();
+        };
+
+        render();
+    </script>
+</body>
+
+</html>

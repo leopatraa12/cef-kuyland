@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/editor_file_item_surface"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/home_server_option_default"
+    android:orientation="vertical"
+    android:paddingStart="18dp"
+    android:paddingTop="16dp"
+    android:paddingEnd="18dp"
+    android:paddingBottom="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/editor_file_type_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/home_news_badge"
+            android:fontFamily="@font/montserrat_bold"
+            android:paddingStart="9dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="9dp"
+            android:paddingBottom="5dp"
+            android:text="PWN"
+            android:textAllCaps="true"
+            android:textColor="@android:color/white"
+            android:textSize="7.5sp" />
+
+        <TextView
+            android:id="@+id/editor_file_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:fontFamily="@font/montserrat_bold"
+            android:maxLines="1"
+            android:textColor="@android:color/white"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/editor_file_meta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/montserrat_medium"
+        android:textColor="@color/launcher_text_secondary"
+        android:textSize="9sp" />
+
+    <TextView
+        android:id="@+id/editor_file_path"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/launcher_console_surface"
+        android:fontFamily="monospace"
+        android:paddingStart="12dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="10dp"
+        android:textColor="#D8E2EC"
+        android:textSize="8.5sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/editor_file_open_action"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:background="@drawable/home_server_select_button"
+            android:fontFamily="@font/montserrat_bold"
+            android:gravity="center"
+            android:text="Abrir"
+            android:textColor="@android:color/white"
+            android:textSize="8.5sp" />
+
+        <TextView
+            android:id="@+id/editor_file_compile_action"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/home_action_text_button"
+            android:fontFamily="@font/montserrat_bold"
+            android:gravity="center"
+            android:text="Compilar"
+            android:textColor="@android:color/white"
+            android:textSize="8.5sp" />
+
+        <TextView
+            android:id="@+id/editor_file_rename_action"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/home_action_secondary"
+            android:fontFamily="@font/montserrat_bold"
+            android:gravity="center"
+            android:text="Renomear"
+            android:textColor="@android:color/white"
+            android:textSize="8.5sp" />
+
+        <TextView
+            android:id="@+id/editor_file_delete_action"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/home_action_text_button"
+            android:fontFamily="@font/montserrat_bold"
+            android:gravity="center"
+            android:text="Excluir"
+            android:textColor="@android:color/white"
+            android:textSize="8.5sp" />
+    </LinearLayout>
+
+</LinearLayout>

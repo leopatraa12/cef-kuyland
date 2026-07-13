@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pickup_studio_item_surface"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/pickup_studio_item_surface"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/pickup_item_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/montserrat_black"
+            android:textColor="@android:color/white"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/pickup_item_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/pickup_studio_badge"
+            android:fontFamily="@font/montserrat_black"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
+            android:textAllCaps="true"
+            android:textColor="@android:color/white"
+            android:textSize="7.5sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/pickup_item_meta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/montserrat_medium"
+        android:textColor="#A3BAD8"
+        android:textSize="9sp" />
+
+    <TextView
+        android:id="@+id/pickup_item_coords"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:fontFamily="monospace"
+        android:textColor="#7FD8FF"
+        android:textSize="8sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/pickup_item_button_load"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:background="@drawable/pickup_studio_secondary_button"
+            android:fontFamily="@font/montserrat_bold"
+            android:gravity="center"
+            android:text="Carregar"
+            android:textColor="@android:color/white"
+            android:textSize="8.5sp" />
+
+        <TextView
+            android:id="@+id/pickup_item_button_preview"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/pickup_studio_secondary_button"
+            android:fontFamily="@font/montserrat_bold"
+            android:gravity="center"
+            android:text="Mostrar"
+            android:textColor="@android:color/white"
+            android:textSize="8.5sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/pickup_item_button_copy"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:background="@drawable/pickup_studio_primary_button"
+            android:fontFamily="@font/montserrat_black"
+            android:gravity="center"
+            android:text="Exportar"
+            android:textColor="@android:color/white"
+            android:textSize="8.5sp" />
+
+        <TextView
+            android:id="@+id/pickup_item_button_delete"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/pickup_studio_secondary_button"
+            android:fontFamily="@font/montserrat_bold"
+            android:gravity="center"
+            android:text="Remover"
+            android:textColor="@android:color/white"
+            android:textSize="8.5sp" />
+    </LinearLayout>
+
+</LinearLayout>
