@@ -21,7 +21,7 @@
 #include "samp_widgets/splashscreen.h"
 #include "samp_widgets/chat.h"
 #include "samp_widgets/spawn.h"
-#include "samp_widgets/playerTabList.h"
+#include "samp_widgets/playertablist.h"
 #include "samp_widgets/voicebutton.h"
 
 #include "samp_widgets/dialogs/dialog.h"
